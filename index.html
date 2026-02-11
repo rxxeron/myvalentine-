@@ -3,58 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promise Protocol</title>
+    <title>Promise Protocol: HD</title>
     <style>
         body {
             margin: 0;
-            background-color: #000;
+            background-color: #050505; /* Deep Black */
             overflow: hidden;
             font-family: 'Courier New', monospace;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            flex-direction: column;
         }
-        
+
         canvas {
             display: block;
-            z-index: 1;
+            /* Ensure canvas is behind the text but visible */
+            z-index: 1; 
         }
 
         #ui-container {
             position: absolute;
-            top: 55%; /* Positioned just below center */
-            text-align: center;
-            z-index: 10;
+            top: 60%; /* Moves text slightly lower to sit under hands */
             width: 100%;
+            text-align: center;
             pointer-events: none;
+            z-index: 10;
         }
 
-        .caption {
+        .main-title {
             color: #fff;
             font-size: 2rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            font-weight: bold;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            letter-spacing: 6px;
+            font-weight: 800;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+            margin-bottom: 15px;
             opacity: 0;
-            animation: fadeIn 1s ease forwards 4s; /* Waits for animation */
+            animation: fadeIn 1s ease forwards 3.5s; /* Fade in after hands meet */
         }
 
-        .sub-caption {
+        .sub-text {
             font-size: 1.1rem;
             color: #ccc;
-            margin-top: 10px;
             font-family: 'Segoe UI', sans-serif;
+            max-width: 90%;
+            margin: 0 auto;
+            line-height: 1.5;
             opacity: 0;
-            animation: fadeIn 1s ease forwards 5s;
+            animation: fadeIn 1s ease forwards 4.5s;
         }
 
-        .highlight { color: #00f3ff; font-weight: bold; }
-        .highlight-2 { color: #ff0055; font-weight: bold; }
+        .highlight-cyan { color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+        .highlight-pink { color: #ff0055; font-weight: bold; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
 
         @keyframes fadeIn { to { opacity: 1; } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .main-title { font-size: 1.5rem; letter-spacing: 3px; }
+            .sub-text { font-size: 0.95rem; }
+            #ui-container { top: 58%; } /* Adjust for mobile screens */
+        }
     </style>
 </head>
 <body>
@@ -62,10 +73,10 @@
     <canvas id="canvas"></canvas>
 
     <div id="ui-container">
-        <div class="caption">Promise_Established</div>
-        <div class="sub-caption">
-            I promise to <span class="highlight">debug your code</span> 
-            and buy snacks from the <span class="highlight-2">Cafeteria</span>.
+        <div class="main-title">PROMISE ESTABLISHED</div>
+        <div class="sub-text">
+            I promise to <span class="highlight-cyan">debug your code</span> 
+            and buy snacks from the <span class="highlight-pink">Cafeteria</span>.
         </div>
     </div>
 
@@ -75,18 +86,10 @@
         
         let width, height;
         let particles = [];
-
+        
         // CONFIGURATION
-        const PARTICLE_DENSITY = 6; // Lower = More particles (High Detail)
+        const DENSITY = 4; // Lower = More particles (Higher Detail)
         const PARTICLE_SIZE = 1.2;
-        
-        // --- SVG DATA FOR REAL HANDS ---
-        // These are distinct "Reaching" hand paths
-        const leftHandPath = new Path2D("M10,150 Q50,140 80,110 T150,50 Q180,30 200,60 T180,120 Q220,100 240,130 T200,180 Q230,170 240,200 T190,230 Q210,240 200,260 T150,250 Q100,300 10,300 Z"); 
-        
-        // We will actually draw the image of hands to scan them, 
-        // because paths are hard to convert to particles directly without a library.
-        // So we use a sneaky "Invisible Image" trick.
 
         function init() {
             width = window.innerWidth;
@@ -94,90 +97,112 @@
             canvas.width = width;
             canvas.height = height;
             
-            // Start the process
-            loadHandImages();
+            createHologram();
         }
 
-        function loadHandImages() {
-            // I created a custom base64 image of TWO HANDS REACHING specifically for this.
-            // Left is CYAN, Right is MAGENTA.
-            const img = new Image();
-            img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNDAwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCI+CiAgPCEtLSBMZWZ0IEhhbmQgKEN5YW4pIC0tPgogIDxwYXRoIGQ9Ik01MCwyMDAgQzEwMCwxODAgMTUwLDE1MCAyMjAsMTYwIEMyNTAsMTY1 2ODAsMTUwIDMwMCwxODAgQzMyMCwyMDAgMzAwLDIyMCAyODAsMjMwIEMzMDAsMjQwIDMxMCwyNjAgMjkwLDI3MCBDMjcwLDI4MCAyNjAsMjkw 2NDAsMjgwIEMyNTAsMzAwIDIwMCwzMjAgMTUwLDMwMCBDMTAwLDI4MCA1MCwyNTAgNTAsMjAwIFoiIGZpbGw9IiMwMGYzZmYiLz4KCiAgPCEtLSBSaWdodCBIYW5kIChNYWdlbnRhKSAtLT4KICA8cGF0aCBkPSJNNzUwLDIwMCBDNzAwLDE4MCA2NTAsMTUwIDU4MCwxNjAgQzU1MCwxNjUgNTIwLDE1MCA1MDAsMTgwIEM0ODAsMjAwIDUwMCwyMjAgNTIwLDIzMCBDNTAwLDI0MCA0OTAsMjYwIDUxMCwyNzAgQzUzMCwyODAgNTQwLDI5MCA1NjAsMjgwIEM1NTAsMzAwIDYwMCwzMjAgNjUwLDMwMCBDNzAwLDI4MCA3NTAsMjUwIDc1MCwyMDAgWiIgZmlsbD0iI2ZmMDA1NSIvPgo8L3N2Zz4=';
+        // --- THE KEY FIX: DRAWING HANDS WITH CODE (NOT EMOJIS) ---
+        function drawHandShape(context, x, y, scale, isLeft) {
+            context.save();
+            context.translate(x, y);
+            context.scale(isLeft ? -scale : scale, scale); // Mirror for left hand
+            context.fillStyle = 'white';
             
-            // Note: The Base64 above is a simplified placeholder. 
-            // TO MAKE FINGERS VISIBLE, we will use a "Pixel Scan" of a high-contrast handshake.
+            // 1. Palm (Base)
+            context.beginPath();
+            context.ellipse(0, 0, 40, 50, 0, 0, Math.PI * 2);
+            context.fill();
+
+            // 2. Fingers (Rectangles with rounded ends)
+            // Index
+            drawFinger(context, 35, -20, 70, 18, -10);
+            // Middle
+            drawFinger(context, 40, 0, 75, 19, 0);
+            // Ring
+            drawFinger(context, 38, 20, 70, 18, 10);
+            // Pinky
+            drawFinger(context, 32, 40, 55, 16, 20);
             
-            // Let's use the Emoji approach again but SCALE IT UP massively 
-            // and force the colors.
+            // 3. Thumb (Angled up)
+            drawFinger(context, 0, -50, 60, 20, -60);
             
-            createParticles();
+            context.restore();
         }
 
-        function createParticles() {
+        function drawFinger(ctx, offsetX, offsetY, length, width, angleDeg) {
+            ctx.save();
+            ctx.translate(offsetX, offsetY);
+            ctx.rotate(angleDeg * Math.PI / 180);
+            ctx.beginPath();
+            ctx.roundRect(0, -width/2, length, width, width/2); // Round tip
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function createHologram() {
             particles = [];
             
-            // 1. Setup the invisible canvas draw
-            const scale = Math.min(width, height) / 400; // Adjust size
-            const centerX = width / 2;
-            const centerY = height / 2 - 50; // Move up slightly so text fits below
-
+            // 1. Clear Screen
             ctx.clearRect(0, 0, width, height);
             
-            // DRAW LEFT HAND (Cyan)
-            ctx.fillStyle = '#00f3ff';
-            ctx.font = '300px Arial'; // Huge font for detail
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🫱', centerX - 20, centerY); // Hand reaching right
+            // 2. Determine Scale & Position
+            // We want hands in the center-ish, but slightly up so text fits below
+            const scale = Math.min(width, height) / 350; 
+            const centerY = height / 2 - 50; 
+            const centerX = width / 2;
 
-            // DRAW RIGHT HAND (Magenta)
-            ctx.fillStyle = '#ff0055';
-            ctx.textAlign = 'left';
-            ctx.fillText('🫲', centerX + 20, centerY); // Hand reaching left
+            // 3. Draw Invisible High-Res Hands
+            // Left Hand (Target Position)
+            drawHandShape(ctx, centerX - 10, centerY, scale, true); 
+            // Right Hand (Target Position)
+            drawHandShape(ctx, centerX + 10, centerY, scale, false);
 
-            // 2. Scan Pixels
+            // 4. Scan Pixels to create particles
             const data = ctx.getImageData(0, 0, width, height).data;
             ctx.clearRect(0, 0, width, height); // Clear immediately
 
-            // 3. Generate Particles
-            // We scan every 'density' pixels
-            for (let y = 0; y < height; y += PARTICLE_DENSITY) {
-                for (let x = 0; x < width; x += PARTICLE_DENSITY) {
-                    const index = (y * width + x) * 4;
-                    const r = data[index];
-                    const g = data[index + 1];
-                    const b = data[index + 2];
-                    const a = data[index + 3];
+            for (let y = 0; y < height; y += DENSITY) {
+                for (let x = 0; x < width; x += DENSITY) {
+                    const alpha = data[(y * width + x) * 4 + 3];
+                    if (alpha > 128) {
+                        // DETERMINE COLOR
+                        // Split screen in half: Left = Cyan, Right = Magenta
+                        let color;
+                        if (x < width / 2) {
+                            color = 'rgba(0, 243, 255, 1)'; // Cyan
+                        } else {
+                            color = 'rgba(255, 0, 85, 1)'; // Magenta
+                        }
 
-                    if (a > 128) {
-                        // Found a pixel!
-                        // Determine Color based on the pixel we found
-                        let color = `rgb(${r}, ${g}, ${b})`;
-                        
-                        // Origin (Target)
-                        let targetX = x;
-                        let targetY = y;
+                        // ANIMATION START POSITIONS
+                        // Left hand comes from Left, Right from Right
+                        let startX = (x < width / 2) ? -Math.random() * 200 : width + Math.random() * 200;
+                        let startY = y + (Math.random() - 0.5) * 100;
 
-                        // Start Position (Fly in from sides)
-                        let startX;
-                        if (x < width / 2) startX = -Math.random() * 500; // Left hand from left
-                        else startX = width + Math.random() * 500; // Right hand from right
-                        
-                        particles.push(new Particle(startX, y, targetX, targetY, color));
+                        particles.push(new Particle(startX, startY, x, y, color));
                     }
                 }
             }
         }
 
         class Particle {
-            constructor(x, y, tx, ty, color) {
+            constructor(x, y, targetX, targetY, color) {
                 this.x = x;
-                this.y = y + (Math.random() - 0.5) * 200; // Add chaos to Y start
-                this.tx = tx;
-                this.ty = ty;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
                 this.color = color;
                 this.size = Math.random() * PARTICLE_SIZE + 0.5;
-                this.speed = (Math.random() * 0.05) + 0.02;
+                // Random speed for organic feel
+                this.speed = Math.random() * 0.04 + 0.03; 
+            }
+
+            update() {
+                // Ease towards target
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                
+                this.x += dx * this.speed;
+                this.y += dy * this.speed;
             }
 
             draw() {
@@ -186,26 +211,11 @@
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
-
-            update() {
-                // Ease towards target
-                const dx = this.tx - this.x;
-                const dy = this.ty - this.y;
-                
-                this.x += dx * this.speed;
-                this.y += dy * this.speed;
-                
-                // Jitter effect (Quantum vibration)
-                if (Math.abs(dx) < 1) {
-                    this.x += (Math.random() - 0.5) * 0.5;
-                    this.y += (Math.random() - 0.5) * 0.5;
-                }
-            }
         }
 
         function animate() {
-            // Clear with slight trail for motion blur
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            // Trail Effect for motion blur
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.3)';
             ctx.fillRect(0, 0, width, height);
 
             particles.forEach(p => {
