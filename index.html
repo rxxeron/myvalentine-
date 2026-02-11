@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code & Love</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* --- STORY MODE STYLES --- */
+        #story-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            max-width: 80%;
+        }
+
+        .avatar { font-size: 80px; margin-bottom: 20px; transition: all 0.5s; }
+        .bubble {
+            background: white;
+            color: black;
+            padding: 15px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            position: relative;
+            margin-bottom: 20px;
+            opacity: 1; 
+            transform: translateY(0);
+            transition: all 0.5s;
+        }
+        /* Chat bubble tail */
+        .bubble::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            border-width: 10px 10px 0; border-style: solid;
+            border-color: white transparent; display: block; width: 0;
+        }
+
+        .code-screen {
+            background: #2d2d2d;
+            border: 2px solid #555;
+            padding: 10px;
+            width: 300px;
+            height: 150px;
+            text-align: left;
+            font-size: 0.8rem;
+            color: #00ff00;
+            display: none;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        /* --- ACTUAL DAY STYLES --- */
+        #daily-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background 1s;
+        }
+
+        /* Day Themes */
+        .bg-rose { background: #ff7675; color: white; }
+        .bg-propose { background: #74b9ff; color: white; }
+        .bg-chocolate { background: #6c5ce7; color: white; }
+        .bg-teddy { background: #fab1a0; color: white; }
+        .bg-promise { background: #0984e3; color: white; }
+        .bg-hug { background: #fd79a8; color: white; }
+        .bg-kiss { background: #e84393; color: white; }
+        .bg-valentine { background: #d63031; color: white; }
+
+        .big-icon { font-size: 100px; animation: heartbeat 1.5s infinite; }
+        h1 { font-size: 2.5rem; margin: 10px; }
+        p { font-size: 1.2rem; max-width: 80%; }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            width: 0%; height: 5px; background: #00ff00; margin-top: 10px; transition: width 2s;
+        }
+
+        /* --- REPLAY BUTTON --- */
+        #replay-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            display: none; /* Hidden during story */
+            transition: background 0.3s;
+            z-index: 100;
+        }
+        #replay-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <button id="replay-btn" onclick="resetStory()">↺ Replay Story</button>
+
+    <div id="story-container">
+        <div class="bubble" id="thought-bubble">Initializing...</div>
+        <div class="avatar" id="avatar">🧑‍💻</div>
+        <div class="code-screen" id="terminal"></div>
+        <div class="progress-bar" id="loader"></div>
+    </div>
+
+    <div id="daily-content">
+        <div class="big-icon" id="day-icon"></div>
+        <h1 id="day-title"></h1>
+        <p id="day-msg"></p>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const days = {
+            7:  { theme: "bg-rose", icon: "🌹", title: "Happy Rose Day!", msg: "Start of something beautiful." },
+            8:  { theme: "bg-propose", icon: "💍", title: "Happy Propose Day!", msg: "You are my bug-free code." },
+            9:  { theme: "bg-chocolate", icon: "🍫", title: "Happy Chocolate Day!", msg: "You're sweeter than success." },
+            10: { theme: "bg-teddy", icon: "🧸", title: "Happy Teddy Day!", msg: "Sending you a virtual hug." },
+            11: { theme: "bg-promise", icon: "🤞", title: "Happy Promise Day!", msg: "I promise to debug all your problems." },
+            12: { theme: "bg-hug", icon: "🤗", title: "Happy Hug Day!", msg: "Loading Hug... 100% Complete." },
+            13: { theme: "bg-kiss", icon: "💋", title: "Happy Kiss Day!", msg: "Compiling kisses for you..." },
+            14: { theme: "bg-valentine", icon: "❤️", title: "Happy Valentine's Day!", msg: "My Player 2 Forever." }
+        };
+
+        const today = new Date();
+        const currentDay = today.getDate(); 
+        // const currentDay = 11; // UNCOMMENT TO TEST
+
+        // --- DOM ELEMENTS ---
+        const storyContainer = document.getElementById('story-container');
+        const dailyContainer = document.getElementById('daily-content');
+        const avatar = document.getElementById('avatar');
+        const bubble = document.getElementById('thought-bubble');
+        const terminal = document.getElementById('terminal');
+        const loader = document.getElementById('loader');
+        const replayBtn = document.getElementById('replay-btn');
+
+        // --- CHECK HISTORY ---
+        const hasVisited = localStorage.getItem('hasVisitedValentine');
+
+        if (!hasVisited) {
+            playStory();
+        } else {
+            showDailyContent();
+        }
+
+        // --- RESET FUNCTION ---
+        function resetStory() {
+            localStorage.removeItem('hasVisitedValentine');
+            location.reload();
+        }
+
+        // --- SCENE 1: THE STORY ---
+        function playStory() {
+            storyContainer.style.display = 'flex';
+            dailyContainer.style.display = 'none';
+            replayBtn.style.display = 'none';
+            
+            // Step 1: Working hard
+            bubble.innerText = "Just solving this Codeforces problem..."; // Customized for Rakibul
+            
+            // Step 2: Realization (3 seconds later)
+            setTimeout(() => {
+                avatar.innerText = "😱"; 
+                bubble.innerText = "WAIT! It's Valentine's Week?!";
+            }, 3000);
+
+            // Step 3: Action (6 seconds later)
+            setTimeout(() => {
+                avatar.innerText = "🏃‍♂️"; 
+                bubble.innerText = "I need to fix this NOW!";
+            }, 6000);
+
+            // Step 4: Coding (8 seconds later)
+            setTimeout(() => {
+                avatar.innerText = "👨‍💻"; 
+                bubble.style.display = 'none'; 
+                terminal.style.display = 'block'; 
+                typeCode();
+            }, 8000);
+        }
+
+        function typeCode() {
+            const codeLines = [
+                "> init project love_for_her",
+                "> import heart",
+                "> while(alive) { love++ }",
+                "> git commit -m 'For Her'",
+                "> deploy to production..."
+            ];
+            let lineIndex = 0;
+            terminal.innerHTML = ""; // Clear previous text
+            
+            let typeInterval = setInterval(() => {
+                if (lineIndex < codeLines.length) {
+                    terminal.innerHTML += codeLines[lineIndex] + "<br>";
+                    lineIndex++;
+                } else {
+                    clearInterval(typeInterval);
+                    loader.style.width = "100%";
+                    setTimeout(() => {
+                        localStorage.setItem('hasVisitedValentine', 'true');
+                        storyContainer.style.display = 'none';
+                        showDailyContent();
+                    }, 2000);
+                }
+            }, 800); 
+        }
+
+        // --- SCENE 2: THE DAILY REVEAL ---
+        function showDailyContent() {
+            dailyContainer.style.display = 'flex';
+            replayBtn.style.display = 'block'; // Show replay button
+            
+            let data = days[currentDay];
+            
+            if (data) {
+                document.body.className = data.theme;
+                // We use dailyContainer background too to ensure coverage
+                dailyContainer.className = data.theme; 
+                document.getElementById('day-icon').innerText = data.icon;
+                document.getElementById('day-title').innerText = data.title;
+                document.getElementById('day-msg').innerText = data.msg;
+            } else {
+                // Fallback
+                document.body.style.background = "#2d3436";
+                document.getElementById('day-icon').innerText = "💖";
+                document.getElementById('day-title').innerText = "Love You!";
+                document.getElementById('day-msg').innerText = "Every day is your day.";
+            }
+        }
+    </script>
+</body>
+</html>
+
