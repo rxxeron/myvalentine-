@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocol: PROMISE</title>
+    <title>Promise Protocol</title>
     <style>
         body {
             margin: 0;
-            background-color: #050505; /* Deep Void Black */
+            background-color: #020202; /* Void Black */
             overflow: hidden;
             font-family: 'Courier New', monospace;
         }
@@ -16,30 +16,31 @@
         }
         #ui {
             position: absolute;
-            bottom: 30px;
+            bottom: 50px;
             width: 100%;
             text-align: center;
             pointer-events: none;
             z-index: 10;
         }
         .caption {
-            color: #00d2ff; /* Nokia/Tron Cyan */
-            font-size: 1.2rem;
+            color: #00f3ff; /* Hologram Cyan */
+            font-size: 1.5rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
+            letter-spacing: 5px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.8);
             opacity: 0;
-            animation: fadeIn 2s ease forwards 4s;
+            animation: fadeIn 2s ease forwards 4s; /* Waits for hands to join */
         }
         .sub-caption {
-            font-size: 0.9rem;
-            color: #ccc;
-            margin-top: 10px;
-            font-family: sans-serif;
+            font-size: 1rem;
+            color: #aaddff;
+            margin-top: 15px;
+            font-family: 'Segoe UI', sans-serif;
             opacity: 0;
             animation: fadeIn 2s ease forwards 5s;
         }
-        .highlight { color: #fff; font-weight: bold; }
+        .highlight { color: #fff; font-weight: bold; text-decoration: underline decoration-cyan; }
         
         @keyframes fadeIn { to { opacity: 1; } }
     </style>
@@ -47,7 +48,7 @@
 <body>
 
     <div id="ui">
-        <div class="caption">Connection Established</div>
+        <div class="caption">Promise_Established_v2.0</div>
         <div class="sub-caption">
             I promise to <span class="highlight">debug your code</span> 
             and buy snacks from the <span class="highlight">EWU Cafeteria</span>.
@@ -62,22 +63,12 @@
         
         let width, height;
         let particles = [];
-        let adjustX = 0;
-        let adjustY = 0;
 
         // CONFIGURATION
-        const PARTICLE_SIZE = 1.5; // Small, crisp dots
-        const PARTICLE_COLOR = 'rgba(0, 210, 255, 1)'; // Cyan Cyan
-        const MOUSE_RADIUS = 100;
-        const GAP = 5; // Distance between particles (Lower = More detailed but slower)
-
-        // MOUSE INTERACTION
-        const mouse = { x: null, y: null, radius: 100 };
-        
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
+        const PARTICLE_SIZE = 1.6; 
+        const GAP = 5; // Distance between particles
+        const MOUSE_RADIUS = 3000; // Power of interaction
+        const FORMATION_SPEED = 0.04; // How fast hands fly in
 
         // RESIZE
         function init() {
@@ -89,60 +80,78 @@
         }
         window.addEventListener('resize', init);
 
-        // --- THE MAGIC: SCANNING TEXT TO CREATE PARTICLES ---
+        // --- MOUSE INTERACTION ---
+        const mouse = { x: undefined, y: undefined };
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        // --- CREATE THE HOLOGRAM ---
         function createParticles() {
             particles = [];
             
-            // 1. Write the Emoji/Text to the canvas invisibly
-            // We use the 🤝 Emoji as the blueprint!
-            const fontSize = Math.min(width, height) / 3;
+            // 1. Draw the Emoji Invisible
+            const fontSize = Math.min(width, height) / 2.5;
             ctx.fillStyle = 'white';
             ctx.font = fontSize + 'px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
-            // Draw the Handshake Emoji
             ctx.fillText('🤝', width / 2, height / 2);
             
-            // 2. Scan the canvas pixel data
+            // 2. Scan Pixels
             const textCoordinates = ctx.getImageData(0, 0, width, height);
-            
-            // 3. Clear the canvas (we only needed the data)
             ctx.clearRect(0, 0, width, height);
 
-            // 4. Create particles wherever the pixel was not transparent
+            // 3. Generate Particles
             for (let y = 0; y < height; y += GAP) {
                 for (let x = 0; x < width; x += GAP) {
-                    // Check alpha value (4th byte in RGBA)
                     if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128) {
-                        let positionX = x;
-                        let positionY = y;
-                        particles.push(new Particle(positionX, positionY));
+                        
+                        // LOGIC: Determine if this particle belongs to Left or Right hand
+                        // We split the screen in half.
+                        let startX, startY;
+                        
+                        if (x < width / 2) {
+                            // Left Hand: Starts from far Left
+                            startX = -width/2 + Math.random() * 100;
+                            startY = y + (Math.random() - 0.5) * 200; // Add chaos
+                        } else {
+                            // Right Hand: Starts from far Right
+                            startX = width + width/2 - Math.random() * 100;
+                            startY = y + (Math.random() - 0.5) * 200;
+                        }
+
+                        particles.push(new Particle(x, y, startX, startY));
                     }
                 }
             }
         }
 
-        // --- PARTICLE CLASS ---
+        // --- PARTICLE PHYSICS ---
         class Particle {
-            constructor(x, y) {
-                // Target Position (Where it wants to be)
-                this.originX = x;
-                this.originY = y;
-                
-                // Current Position (Starts random)
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                
-                // Physics
-                this.density = (Math.random() * 30) + 1;
+            constructor(targetX, targetY, startX, startY) {
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.x = startX; // Current position (starts off-screen)
+                this.y = startY;
                 this.size = Math.random() * PARTICLE_SIZE + 0.5;
-                this.vx = 0; // Velocity
-                this.vy = 0;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 1;
+                this.color = this.getColor(targetX);
+            }
+
+            getColor(x) {
+                // Gradient Effect: Cyan to White to Blue
+                const distFromCenter = Math.abs(x - width/2);
+                if (distFromCenter < 20) return '#ffffff'; // The "Touch" point is white
+                if (x < width/2) return '#00f3ff'; // Left hand Cyan
+                return '#0099ff'; // Right hand Deep Blue
             }
 
             draw() {
-                ctx.fillStyle = PARTICLE_COLOR;
+                ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.closePath();
@@ -150,41 +159,37 @@
             }
 
             update() {
-                // Mouse Interaction Physics
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx*dx + dy*dy);
-                let forceDirectionX = dx / distance;
-                let forceDirectionY = dy / distance;
-                let maxDistance = mouse.radius;
-                let force = (maxDistance - distance) / maxDistance;
-                let directionX = forceDirectionX * force * this.density;
-                let directionY = forceDirectionY * force * this.density;
+                // 1. FLY IN ANIMATION (Ease towards target)
+                let dx = this.targetX - this.x;
+                let dy = this.targetY - this.y;
+                
+                // If far away, move fast. If close, slow down.
+                this.x += dx * FORMATION_SPEED;
+                this.y += dy * FORMATION_SPEED;
 
-                if (distance < mouse.radius) {
-                    this.x -= directionX * 3;
-                    this.y -= directionY * 3;
-                } else {
-                    // Return to Origin (The Hand Shape)
-                    if (this.x !== this.originX) {
-                        let dx = this.x - this.originX;
-                        this.x -= dx / 15; // Speed of return
-                    }
-                    if (this.y !== this.originY) {
-                        let dy = this.y - this.originY;
-                        this.y -= dy / 15;
-                    }
+                // 2. MOUSE DISRUPTION (Hologram Glitch)
+                let mouseDx = mouse.x - this.x;
+                let mouseDy = mouse.y - this.y;
+                let distance = Math.sqrt(mouseDx*mouseDx + mouseDy*mouseDy);
+                
+                if (distance < 100) {
+                    const forceDirectionX = mouseDx / distance;
+                    const forceDirectionY = mouseDy / distance;
+                    const force = (100 - distance) / 100;
+                    const directionX = forceDirectionX * force * this.density;
+                    const directionY = forceDirectionY * force * this.density;
+                    
+                    this.x -= directionX * 5;
+                    this.y -= directionY * 5;
                 }
             }
         }
 
-        // --- ANIMATION LOOP ---
+        // --- LOOP ---
         function animate() {
-            ctx.clearRect(0, 0, width, height);
-            
-            // Connect particles with lines if they are close (Nokia "Connection" effect)
-            // Warning: Computationally expensive, so we check only a few neighbors or skip
-            // For mobile performance, we stick to dots, maybe adding a glow overlay
+            // Trail Effect: Leaves a slight blur behind moving particles
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, width, height);
             
             for (let i = 0; i < particles.length; i++) {
                 particles[i].draw();
@@ -193,19 +198,8 @@
             requestAnimationFrame(animate);
         }
 
-        // START
         init();
         animate();
-
-        // --- COOL INTRO EFFECT ---
-        // Scatter particles initially then let them come together
-        setTimeout(() => {
-            particles.forEach(p => {
-                p.x = Math.random() * width;
-                p.y = Math.random() * height;
-            });
-        }, 100);
-
     </script>
 </body>
 </html>
