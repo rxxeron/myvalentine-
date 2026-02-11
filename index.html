@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promise Protocol: Final</title>
+    <title>Promise Protocol: Connection</title>
     <style>
         body {
             margin: 0;
-            background-color: #050505;
+            background-color: #000;
             overflow: hidden;
             font-family: 'Courier New', monospace;
             display: flex;
@@ -27,7 +27,7 @@
 
         #ui-container {
             position: absolute;
-            top: 55%; 
+            top: 58%; 
             width: 100%;
             text-align: center;
             pointer-events: none;
@@ -36,35 +36,36 @@
 
         .main-title {
             color: #fff;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             font-weight: 800;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            margin-bottom: 15px;
             opacity: 0;
-            animation: fadeIn 1s ease forwards 3s; 
+            animation: fadeIn 1s ease forwards 3.5s; /* Wait for hands */
         }
 
         .sub-text {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: #ccc;
             font-family: 'Segoe UI', sans-serif;
             max-width: 90%;
             margin: 0 auto;
-            line-height: 1.5;
+            line-height: 1.6;
             opacity: 0;
-            animation: fadeIn 1s ease forwards 4s;
+            animation: fadeIn 1s ease forwards 4.5s;
         }
 
-        .highlight-cyan { color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
-        .highlight-pink { color: #ff0055; font-weight: bold; text-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
+        .highlight-cyan { color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px rgba(0, 243, 255, 0.6); }
+        .highlight-pink { color: #ff0055; font-weight: bold; text-shadow: 0 0 10px rgba(255, 0, 85, 0.6); }
 
         @keyframes fadeIn { to { opacity: 1; } }
-
+        
         @media (max-width: 600px) {
-            .main-title { font-size: 1.4rem; letter-spacing: 2px; }
-            #ui-container { top: 52%; } 
+            .main-title { font-size: 1.2rem; letter-spacing: 2px; }
+            .sub-text { font-size: 0.9rem; }
+            #ui-container { top: 55%; }
         }
     </style>
 </head>
@@ -87,8 +88,8 @@
         let width, height;
         let particles = [];
         
-        // --- SETTINGS ---
-        const DENSITY = 3; // Lower = High Res
+        // SETTINGS
+        const DENSITY = 3; // Lower = Sharper (More particles)
         const PARTICLE_SIZE = 1.3;
 
         function init() {
@@ -99,33 +100,37 @@
             createHologram();
         }
 
-        // --- NEW GEOMETRY: SIDE PROFILE HAND (NOKIA STYLE) ---
-        function drawReachingHand(ctx, x, y, scale, isLeft) {
+        // --- THE NOKIA SHAPE LOGIC (Side Profile) ---
+        function drawSideHand(ctx, x, y, scale, isLeft) {
             ctx.save();
             ctx.translate(x, y);
-            ctx.scale(isLeft ? 1 : -1, 1); // Flip for right hand
+            // Flip horizontal if it's the right hand (so they face each other)
+            ctx.scale(isLeft ? 1 : -1, 1); 
             
             ctx.fillStyle = 'white';
             ctx.beginPath();
             
-            // Draw a smooth profile of a hand reaching out
-            // Coordinates relative to (x,y)
-            ctx.moveTo(-100 * scale, 30 * scale); // Wrist Bottom
-            ctx.lineTo(-40 * scale, 30 * scale);  // Palm Bottom
+            // This path traces a human hand reaching out from the side
+            // 1. Wrist Bottom
+            ctx.moveTo(-120 * scale, 50 * scale);
             
-            // Fingers curling under
-            ctx.bezierCurveTo(-10 * scale, 30 * scale, 10 * scale, 40 * scale, 30 * scale, 20 * scale); // Knuckles
+            // 2. Palm Bottom curve
+            ctx.quadraticCurveTo(-60 * scale, 50 * scale, -20 * scale, 40 * scale);
             
-            // Index Finger (Pointing)
-            ctx.bezierCurveTo(50 * scale, 20 * scale, 70 * scale, 15 * scale, 90 * scale, 5 * scale); // Tip top
-            ctx.bezierCurveTo(70 * scale, 0, 50 * scale, -5 * scale, 20 * scale, -10 * scale); // Finger top
+            // 3. Fingers (Curved under)
+            ctx.quadraticCurveTo(10 * scale, 30 * scale, 30 * scale, 20 * scale);
             
-            // Thumb (Sticking up)
-            ctx.bezierCurveTo(10 * scale, -30 * scale, 0, -50 * scale, -20 * scale, -40 * scale); // Thumb tip
-            ctx.bezierCurveTo(-30 * scale, -30 * scale, -30 * scale, -20 * scale, -50 * scale, -10 * scale); // Thumb base
+            // 4. Index Finger Tip (The main reaching point)
+            ctx.bezierCurveTo(60 * scale, 15 * scale, 80 * scale, 5 * scale, 90 * scale, -10 * scale);
             
-            // Wrist Top
-            ctx.lineTo(-100 * scale, -10 * scale);
+            // 5. Top of Hand / Knuckles
+            ctx.bezierCurveTo(60 * scale, -20 * scale, 30 * scale, -20 * scale, 0, -30 * scale);
+            
+            // 6. Thumb (Sticking up slightly)
+            ctx.bezierCurveTo(-10 * scale, -60 * scale, -30 * scale, -60 * scale, -50 * scale, -40 * scale);
+            
+            // 7. Wrist Top
+            ctx.quadraticCurveTo(-80 * scale, -30 * scale, -120 * scale, -30 * scale);
             
             ctx.closePath();
             ctx.fill();
@@ -136,38 +141,40 @@
             particles = [];
             ctx.clearRect(0, 0, width, height);
             
-            // Scale and Position
-            const scale = Math.min(width, height) / 250; 
-            const centerY = height / 2 - 80; 
+            // Adjust scale to look good on mobile
+            const scale = Math.min(width, height) / 300; 
+            const centerY = height / 2 - 60; // Slightly above center
             const centerX = width / 2;
             
-            // Distance between hands (almost touching)
-            const gap = 10 * scale; 
+            // The "Gap" - how close they get (Nokia hands don't touch, they almost touch)
+            const gap = 15 * scale; 
 
-            // 1. Draw Invisible Hands to Scan
-            // Left Hand (Reaching from Left)
-            drawReachingHand(ctx, centerX - 100 * scale - gap, centerY, scale, true);
-            // Right Hand (Reaching from Right)
-            drawReachingHand(ctx, centerX + 100 * scale + gap, centerY, scale, false);
+            // 1. Draw Invisible Hands
+            // Left Hand (Cyan)
+            drawSideHand(ctx, centerX - gap, centerY, scale, true);
+            // Right Hand (Magenta)
+            drawSideHand(ctx, centerX + gap, centerY, scale, false);
 
             // 2. Scan Pixels
             const data = ctx.getImageData(0, 0, width, height).data;
-            ctx.clearRect(0, 0, width, height); 
+            ctx.clearRect(0, 0, width, height); // Clear immediately
 
-            // 3. Generate Particles
+            // 3. Create Particles
             for (let y = 0; y < height; y += DENSITY) {
                 for (let x = 0; x < width; x += DENSITY) {
                     if (data[(y * width + x) * 4 + 3] > 128) {
                         
-                        // Color Split
+                        // Color Split: Left = Cyan, Right = Magenta
                         let color;
-                        if (x < width / 2) color = 'rgba(0, 243, 255, 1)'; // Cyan
-                        else color = 'rgba(255, 0, 85, 1)'; // Magenta
+                        if (x < width / 2) {
+                            color = 'rgba(0, 243, 255, 1)'; 
+                        } else {
+                            color = 'rgba(255, 0, 85, 1)'; 
+                        }
 
-                        // Animation Start Positions
-                        // Left hand comes from left edge, Right from right edge
-                        let startX = (x < width / 2) ? -100 : width + 100;
-                        let startY = y + (Math.random() - 0.5) * 200;
+                        // Start Positions (Fly in from far edges)
+                        let startX = (x < width / 2) ? -200 : width + 200;
+                        let startY = y + (Math.random() - 0.5) * 100;
 
                         particles.push(new Particle(startX, startY, x, y, color));
                     }
@@ -183,10 +190,12 @@
                 this.ty = ty;
                 this.color = color;
                 this.size = Math.random() * PARTICLE_SIZE + 0.5;
-                this.speed = Math.random() * 0.04 + 0.02;
+                // Random speed for organic feel
+                this.speed = Math.random() * 0.03 + 0.02; 
             }
 
             update() {
+                // Ease towards target position
                 this.x += (this.tx - this.x) * this.speed;
                 this.y += (this.ty - this.y) * this.speed;
             }
@@ -200,13 +209,20 @@
         }
 
         function animate() {
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.3)';
+            // Trail Effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
             ctx.fillRect(0, 0, width, height);
-            particles.forEach(p => { p.update(); p.draw(); });
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
             requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', init);
+        
+        // Start
         init();
         animate();
     </script>
