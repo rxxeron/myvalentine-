@@ -3,116 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sync: Rakib & Nirjhora</title>
+    <title>Link Established | Rakib & Nirjhora</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
-        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
-        #ui { position: absolute; bottom: 15%; width: 100%; text-align: center; z-index: 10; pointer-events: none; }
-        .status { color: #00ffcc; font-size: 0.7rem; letter-spacing: 2px; opacity: 0; animation: fadeIn 0.5s forwards 4s; }
-        .promise { font-size: 0.9rem; color: #888; margin-top: 10px; opacity: 0; animation: fadeIn 1s forwards 5s; }
-        .cyan { color: #00f3ff; font-weight: bold; }
-        .pink { color: #ff0055; font-weight: bold; }
+        :root {
+            --cyan: #00f3ff;
+            --pink: #ff0055;
+        }
+
+        body {
+            margin: 0;
+            background-color: #050505;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* --- TEXT CONTAINER --- */
+        #name-container {
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #name-container.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .name {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .rakib { color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
+        .nirjhora { color: var(--pink); text-shadow: 0 0 20px var(--pink); }
+        .heart { color: #fff; font-size: 2.5rem; text-shadow: 0 0 20px #fff; }
+
+        /* --- UI OVERLAY --- */
+        #ui-overlay {
+            position: absolute;
+            bottom: 10%;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .status {
+            color: #00ffcc;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            opacity: 0;
+        }
+
+        .promise {
+            font-size: 1rem;
+            color: #888;
+            margin-top: 10px;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0;
+        }
+
+        .active-text { animation: fadeIn 1s forwards; }
+
         @keyframes fadeIn { to { opacity: 1; } }
+
+        /* Mobile specific font sizing */
+        @media (max-width: 600px) {
+            .name { font-size: 1.8rem; }
+            .heart { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
+
     <canvas id="canvas"></canvas>
-    <div id="ui">
-        <div class="status">>> LINK_ESTABLISHED: 200_OK</div>
-        <div class="promise">
-            I promise to <span class="cyan">debug your code</span> and buy snacks from the <span class="pink">EWU Cafeteria</span>.
+
+    <div id="name-container">
+        <span class="name rakib">Rakib</span>
+        <span class="heart">❤️</span>
+        <span class="name nirjhora">Nirjhora</span>
+    </div>
+
+    <div id="ui-overlay">
+        <div id="status-tag" class="status">>> LINK_ENCRYPTED_256_BIT</div>
+        <div id="promise-tag" class="promise">
+            I promise to <b>debug your code</b> and buy snacks from the <b>EWU Cafeteria</b>.
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let particles = [], width, height, linkProgress = 0;
-        const dpr = window.devicePixelRatio || 2; // High-res fix
+        let width, height, particles = [];
+        let linkProgress = 0;
+        let isConnected = false;
 
         function init() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
-            createParticles();
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<60; i++) particles.push(new Particle());
         }
 
-        function createParticles() {
-            particles = [];
-            const offCanvas = document.createElement('canvas');
-            const offCtx = offCanvas.getContext('2d');
-            offCanvas.width = width;
-            offCanvas.height = height;
-
-            // Use a very heavy font for better particle density
-            const fontSize = Math.min(width, height) / 8;
-            offCtx.font = `900 ${fontSize}px Arial Black, sans-serif`;
-            offCtx.textAlign = 'center';
-            offCtx.textBaseline = 'middle';
-            
-            const text = "Rakib ❤️ Nirjhora";
-            offCtx.fillText(text, width / 2, height / 2 - 30);
-
-            const pixels = offCtx.getImageData(0, 0, width, height).data;
-            const density = 2.5; // Tighter grid for mobile clarity
-
-            for (let y = 0; y < height; y += density) {
-                for (let x = 0; x < width; x += density) {
-                    if (pixels[(y * width + x) * 4 + 3] > 128) {
-                        let color;
-                        const relX = x / width;
-                        if (relX < 0.42) color = '#00f3ff';      // Rakib
-                        else if (relX > 0.58) color = '#ff0055'; // Nirjhora
-                        else color = '#ffffff';                 // Heart
-
-                        particles.push({
-                            x: (relX < 0.5) ? -50 : width + 50,
-                            y: height / 2 - 30,
-                            tx: x, ty: y,
-                            color: color,
-                            size: Math.random() * 1.5 + 0.5,
-                            ease: Math.random() * 0.06 + 0.04
-                        });
-                    }
-                }
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.size = Math.random() * 2;
+                this.alpha = Math.random();
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff0055';
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if(this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.reset();
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                ctx.fill();
             }
         }
 
-        function drawLines() {
-            const cy = height / 2 - 30;
-            const p = Math.min(linkProgress * 2, 1);
-            ctx.lineWidth = 2;
+        function drawCircuitTraces() {
+            const centerY = height / 2;
+            const progress = Math.min(linkProgress * 1.5, 1);
+            
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.shadowBlur = 15;
+
+            // Left Trace (Cyan)
             ctx.strokeStyle = '#00f3ff';
-            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo((width/2 - 10) * p, cy); ctx.stroke();
+            ctx.shadowColor = '#00f3ff';
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo((width/2 - 20) * progress, centerY);
+            ctx.stroke();
+
+            // Right Trace (Pink)
             ctx.strokeStyle = '#ff0055';
-            ctx.beginPath(); ctx.moveTo(width, cy); ctx.lineTo(width - (width/2 - 10) * p, cy); ctx.stroke();
-            if (linkProgress > 0.5) {
+            ctx.shadowColor = '#ff0055';
+            ctx.beginPath();
+            ctx.moveTo(width, centerY);
+            ctx.lineTo(width - (width/2 - 20) * progress, centerY);
+            ctx.stroke();
+
+            // The Connection Point
+            if (linkProgress > 0.65) {
                 ctx.fillStyle = '#fff';
-                ctx.beginPath(); ctx.arc(width/2, cy, (linkProgress-0.5)*15, 0, Math.PI*2); ctx.fill();
+                ctx.shadowColor = '#fff';
+                ctx.beginPath();
+                ctx.arc(width/2, centerY, (linkProgress - 0.65) * 50, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
 
         function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#050505';
             ctx.fillRect(0, 0, width, height);
-            if (linkProgress < 1) {
-                linkProgress += 0.008;
-                drawLines();
+
+            if (!isConnected) {
+                linkProgress += 0.01;
+                drawCircuitTraces();
+                if (linkProgress >= 1) {
+                    isConnected = true;
+                    document.getElementById('name-container').classList.add('active');
+                    document.getElementById('status-tag').classList.add('active-text');
+                    document.getElementById('promise-tag').classList.add('active-text');
+                }
             } else {
+                // Background Particle Energy
                 particles.forEach(p => {
-                    p.x += (p.tx - p.x) * p.ease;
-                    p.y += (p.ty - p.y) * p.ease;
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                    p.update();
+                    p.draw();
                 });
+                // Small Sparkles around names
+                ctx.shadowBlur = 0;
             }
+
             requestAnimationFrame(animate);
         }
 
-        window.addEventListener('resize', () => location.reload());
-        init(); animate();
+        window.addEventListener('resize', init);
+        init();
+        animate();
     </script>
 </body>
 </html>
