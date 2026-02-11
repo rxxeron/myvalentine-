@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promise Protocol: Connection</title>
+    <title>Link Established | Rakib + Nirjhora</title>
     <style>
         body {
             margin: 0;
-            background-color: #020202; /* Deep Void Black */
+            background-color: #050505;
             overflow: hidden;
             font-family: 'Courier New', monospace;
             display: flex;
@@ -22,51 +22,42 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 1; 
+            z-index: 1;
         }
 
         #ui-container {
             position: absolute;
-            top: 65%; /* Sit below the main names */
+            bottom: 15%; 
             width: 100%;
             text-align: center;
             pointer-events: none;
             z-index: 10;
         }
 
-        .main-title {
-            color: #fff;
-            font-size: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-weight: 800;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-            margin-bottom: 15px;
+        .status-tag {
+            color: #00ffcc;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
             opacity: 0;
-            animation: fadeIn 1s ease forwards 4s; /* Wait for names to form */
+            animation: fadeIn 0.5s ease forwards 4s;
         }
 
         .sub-text {
-            font-size: 1.1rem;
-            color: #ccc;
+            font-size: 1rem;
+            color: #888;
             font-family: 'Segoe UI', sans-serif;
-            max-width: 90%;
+            max-width: 85%;
             margin: 0 auto;
-            line-height: 1.6;
+            line-height: 1.4;
             opacity: 0;
             animation: fadeIn 1s ease forwards 5s;
         }
 
-        .highlight-cyan { color: #00f3ff; font-weight: bold; text-shadow: 0 0 15px rgba(0, 243, 255, 0.6); }
-        .highlight-pink { color: #ff0055; font-weight: bold; text-shadow: 0 0 15px rgba(255, 0, 85, 0.6); }
+        .highlight { color: #00f3ff; font-weight: bold; }
+        .pink-glow { color: #ff0055; font-weight: bold; }
 
         @keyframes fadeIn { to { opacity: 1; } }
-        
-        @media (max-width: 600px) {
-            .main-title { font-size: 1.2rem; letter-spacing: 2px; }
-            .sub-text { font-size: 0.9rem; }
-            #ui-container { top: 60%; }
-        }
     </style>
 </head>
 <body>
@@ -74,10 +65,10 @@
     <canvas id="canvas"></canvas>
 
     <div id="ui-container">
-        <div class="main-title">CONNECTION ESTABLISHED</div>
+        <div class="status-tag">[ SYSTEM_LINK_ESTABLISHED ]</div>
         <div class="sub-text">
-            I promise to <span class="highlight-cyan">debug your code</span> 
-            and buy snacks from the <span class="highlight-pink">Cafeteria</span>.
+            I promise to <span class="highlight">debug your code</span> 
+            and buy snacks from the <span class="pink-glow">Cafeteria</span>.
         </div>
     </div>
 
@@ -85,117 +76,128 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
-        let width, height;
-        let particles = [];
+        let width, height, particles = [];
+        let connectionProgress = 0; // 0 to 1
         
-        // --- SETTINGS ---
-        const DENSITY = 4; // Lower = Sharper text (more particles)
-        const PARTICLE_SIZE = 1.5;
-        const TEXT = "Rakib + Nirjhora";
+        // --- CONFIGURATION ---
+        const NAME_TEXT = "Rakib + Nirjhora";
+        const DENSITY = 3; // Very high detail
+        const P_SIZE = 1.4;
 
         function init() {
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
-            createHologram();
+            createParticleText();
         }
 
-        function createHologram() {
+        function createParticleText() {
             particles = [];
             ctx.clearRect(0, 0, width, height);
-            
-            // 1. Draw Invisible Text to Scan
-            // Responsive font size
-            const fontSize = Math.min(width, height) / 8; 
-            ctx.font = `800 ${fontSize}px 'Segoe UI', sans-serif`;
-            ctx.fillStyle = 'white';
+
+            // 1. Create high-res text blueprint
+            const fontSize = Math.min(width, height) / 9;
+            ctx.font = `900 ${fontSize}px 'Arial', sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
-            // Draw it slightly above center
-            const centerY = height / 2 - 50;
-            ctx.fillText(TEXT, width / 2, centerY);
+            ctx.fillText(NAME_TEXT, width / 2, height / 2 - 40);
 
-            // 2. Scan Pixels
+            // 2. Scan pixels
             const data = ctx.getImageData(0, 0, width, height).data;
-            ctx.clearRect(0, 0, width, height); // Clear immediately
+            ctx.clearRect(0, 0, width, height);
 
-            // 3. Create Particles based on text pixels
             for (let y = 0; y < height; y += DENSITY) {
                 for (let x = 0; x < width; x += DENSITY) {
-                    // If pixel is not transparent
                     if (data[(y * width + x) * 4 + 3] > 128) {
                         
-                        // --- COLOR LOGIC ---
+                        // Color logic based on side
                         let color;
-                        const centerX = width / 2;
-                        // Define boundaries for coloring based on X position
-                        const splitWidth = fontSize * 2; 
+                        if (x < width/2 - 20) color = '#00f3ff'; // Rakib (Cyan)
+                        else if (x > width/2 + 20) color = '#ff0055'; // Nirjhora (Pink)
+                        else color = '#ffffff'; // The '+' link
 
-                        if (x < centerX - splitWidth/3) {
-                             // Left side (Rakib) -> Cyan
-                            color = 'rgba(0, 243, 255, 1)';
-                        } else if (x > centerX + splitWidth/3) {
-                             // Right side (Nirjhora) -> Magenta
-                            color = 'rgba(255, 0, 85, 1)';
-                        } else {
-                             // Center (+) -> White
-                            color = 'rgba(255, 255, 255, 1)';
-                        }
+                        // Start position (scattered far away)
+                        let startX = x + (x < width/2 ? -width : width);
+                        let startY = y + (Math.random() - 0.5) * 400;
 
-                        // --- ANIMATION START POSITIONS ---
-                        // Start random off-screen or scattered
-                        let startX = Math.random() * width;
-                        let startY = Math.random() * height;
-                        // Scatter them further away initially
-                        if (Math.random() > 0.5) startX += width; else startX -= width;
-                        if (Math.random() > 0.5) startY += height; else startY -= height;
-
-                        particles.push(new Particle(startX, startY, x, y, color));
+                        particles.push({
+                            x: startX, y: startY,
+                            tx: x, ty: y,
+                            color: color,
+                            size: Math.random() * P_SIZE + 0.5,
+                            vx: 0, vy: 0,
+                            delay: Math.random() * 50 // Stagger arrival
+                        });
                     }
                 }
             }
         }
 
-        class Particle {
-            constructor(x, y, tx, ty, color) {
-                this.x = x; // Current position
-                this.y = y;
-                this.tx = tx; // Target position
-                this.ty = ty;
-                this.color = color;
-                this.size = Math.random() * PARTICLE_SIZE + 0.5;
-                // Random speed for organic assembly feel
-                this.speed = Math.random() * 0.03 + 0.015; 
-            }
+        function drawPortLink() {
+            // Draw the "ICE Engineer" connection wires
+            const centerY = height / 2 - 40;
+            const progress = Math.min(connectionProgress * 2, 1);
+            
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            
+            // Left "Male" Wire
+            ctx.strokeStyle = '#00f3ff';
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width/2 * progress - 10, centerY);
+            ctx.stroke();
+            
+            // Right "Female" Wire
+            ctx.strokeStyle = '#ff0055';
+            ctx.beginPath();
+            ctx.moveTo(width, centerY);
+            ctx.lineTo(width - (width/2 * progress) + 10, centerY);
+            ctx.stroke();
 
-            update() {
-                // Ease towards target position (Standard PID-like easing)
-                this.x += (this.tx - this.x) * this.speed;
-                this.y += (this.ty - this.y) * this.speed;
-            }
-
-            draw() {
-                ctx.fillStyle = this.color;
+            // The Connection Spark
+            if (connectionProgress > 0.5) {
+                ctx.fillStyle = '#fff';
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.arc(width/2, centerY, 5 * (connectionProgress), 0, Math.PI*2);
                 ctx.fill();
+                // Glow
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#fff';
             }
         }
 
         function animate() {
-            // Trail Effect (Motion Blur)
-            ctx.fillStyle = 'rgba(2, 2, 2, 0.2)';
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
             ctx.fillRect(0, 0, width, height);
-
-            particles.forEach(p => { p.update(); p.draw(); });
+            
+            if (connectionProgress < 1) {
+                connectionProgress += 0.01;
+                drawPortLink();
+            } else {
+                // Connection complete -> Assemble names
+                ctx.shadowBlur = 0; 
+                particles.forEach(p => {
+                    if (p.delay > 0) {
+                        p.delay--;
+                    } else {
+                        p.x += (p.tx - p.x) * 0.06;
+                        p.y += (p.ty - p.y) * 0.06;
+                    }
+                    
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
             requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', init);
         init();
-        setTimeout(animate, 500); // Slight delay before animation starts
+        animate();
     </script>
 </body>
 </html>
