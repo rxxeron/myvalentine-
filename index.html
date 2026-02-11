@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Established | Rakib + Nirjhora</title>
+    <title>Sync: Rakib & Nirjhora</title>
     <style>
         body {
             margin: 0;
-            background-color: #050505;
+            background-color: #030303;
             overflow: hidden;
             font-family: 'Courier New', monospace;
             display: flex;
@@ -27,35 +27,32 @@
 
         #ui-container {
             position: absolute;
-            bottom: 15%; 
+            bottom: 12%; 
             width: 100%;
             text-align: center;
             pointer-events: none;
             z-index: 10;
         }
 
-        .status-tag {
+        .status {
             color: #00ffcc;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
             opacity: 0;
             animation: fadeIn 0.5s ease forwards 4s;
         }
 
-        .sub-text {
-            font-size: 1rem;
-            color: #888;
+        .promise {
+            font-size: 0.95rem;
+            color: #aaa;
             font-family: 'Segoe UI', sans-serif;
-            max-width: 85%;
-            margin: 0 auto;
-            line-height: 1.4;
+            margin-top: 8px;
             opacity: 0;
             animation: fadeIn 1s ease forwards 5s;
         }
 
-        .highlight { color: #00f3ff; font-weight: bold; }
-        .pink-glow { color: #ff0055; font-weight: bold; }
+        .cyan { color: #00f3ff; font-weight: bold; }
+        .pink { color: #ff0055; font-weight: bold; }
 
         @keyframes fadeIn { to { opacity: 1; } }
     </style>
@@ -65,10 +62,10 @@
     <canvas id="canvas"></canvas>
 
     <div id="ui-container">
-        <div class="status-tag">[ SYSTEM_LINK_ESTABLISHED ]</div>
-        <div class="sub-text">
-            I promise to <span class="highlight">debug your code</span> 
-            and buy snacks from the <span class="pink-glow">Cafeteria</span>.
+        <div class="status">>> CONNECTION_SECURE: 200 OK</div>
+        <div class="promise">
+            I promise to <span class="cyan">debug your code</span> 
+            and buy snacks from the <span class="pink">EWU Cafeteria</span>.
         </div>
     </div>
 
@@ -77,125 +74,133 @@
         const ctx = canvas.getContext('2d');
         
         let width, height, particles = [];
-        let connectionProgress = 0; // 0 to 1
-        
-        // --- CONFIGURATION ---
-        const NAME_TEXT = "Rakib + Nirjhora";
-        const DENSITY = 3; // Very high detail
-        const P_SIZE = 1.4;
+        let linkProgress = 0;
+        const dpr = window.devicePixelRatio || 1; // Fix for High-Res Mobile
+
+        // --- CUSTOMIZATION ---
+        const NAME_1 = "Rakib";
+        const NAME_2 = "Nirjhora";
+        const HEART = "❤️";
+        const DENSITY = 3.5; // Lower = Higher Detail
 
         function init() {
             width = window.innerWidth;
             height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            createParticleText();
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            createBlueprint();
         }
 
-        function createParticleText() {
+        function createBlueprint() {
             particles = [];
-            ctx.clearRect(0, 0, width, height);
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d');
+            offCanvas.width = width;
+            offCanvas.height = height;
 
-            // 1. Create high-res text blueprint
-            const fontSize = Math.min(width, height) / 9;
-            ctx.font = `900 ${fontSize}px 'Arial', sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(NAME_TEXT, width / 2, height / 2 - 40);
+            const fontSize = Math.min(width, height) / 8;
+            offCtx.font = `900 ${fontSize}px Arial, sans-serif`;
+            offCtx.textAlign = 'center';
+            offCtx.textBaseline = 'middle';
+            
+            // Draw the text blueprint
+            const text = `${NAME_1} ${HEART} ${NAME_2}`;
+            offCtx.fillText(text, width / 2, height / 2 - 30);
 
-            // 2. Scan pixels
-            const data = ctx.getImageData(0, 0, width, height).data;
-            ctx.clearRect(0, 0, width, height);
+            const pixels = offCtx.getImageData(0, 0, width, height).data;
 
             for (let y = 0; y < height; y += DENSITY) {
                 for (let x = 0; x < width; x += DENSITY) {
-                    if (data[(y * width + x) * 4 + 3] > 128) {
+                    const alpha = pixels[(y * width + x) * 4 + 3];
+                    if (alpha > 128) {
                         
-                        // Color logic based on side
+                        // Color logic based on text section
                         let color;
-                        if (x < width/2 - 20) color = '#00f3ff'; // Rakib (Cyan)
-                        else if (x > width/2 + 20) color = '#ff0055'; // Nirjhora (Pink)
-                        else color = '#ffffff'; // The '+' link
+                        const relativeX = x / width;
+                        if (relativeX < 0.42) color = '#00f3ff';      // Rakib
+                        else if (relativeX > 0.58) color = '#ff0055'; // Nirjhora
+                        else color = '#ffffff';                       // Heart
 
-                        // Start position (scattered far away)
-                        let startX = x + (x < width/2 ? -width : width);
-                        let startY = y + (Math.random() - 0.5) * 400;
+                        // Start points (Flying in from male/female side ports)
+                        let startX = (relativeX < 0.5) ? -50 : width + 50;
+                        let startY = height / 2 - 30;
 
                         particles.push({
                             x: startX, y: startY,
                             tx: x, ty: y,
                             color: color,
-                            size: Math.random() * P_SIZE + 0.5,
-                            vx: 0, vy: 0,
-                            delay: Math.random() * 50 // Stagger arrival
+                            size: Math.random() * 1.5 + 0.5,
+                            friction: Math.random() * 0.05 + 0.04,
+                            delay: Math.random() * 60
                         });
                     }
                 }
             }
         }
 
-        function drawPortLink() {
-            // Draw the "ICE Engineer" connection wires
-            const centerY = height / 2 - 40;
-            const progress = Math.min(connectionProgress * 2, 1);
+        function drawCircuitLink() {
+            const cy = height / 2 - 30;
+            const stopPoint = 15;
             
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            
-            // Left "Male" Wire
+            // Left Trace (Male Header)
             ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo(width/2 * progress - 10, centerY);
-            ctx.stroke();
-            
-            // Right "Female" Wire
-            ctx.strokeStyle = '#ff0055';
-            ctx.beginPath();
-            ctx.moveTo(width, centerY);
-            ctx.lineTo(width - (width/2 * progress) + 10, centerY);
+            ctx.moveTo(0, cy);
+            ctx.lineTo((width/2 - stopPoint) * Math.min(linkProgress * 2, 1), cy);
             ctx.stroke();
 
-            // The Connection Spark
-            if (connectionProgress > 0.5) {
+            // Right Trace (Female Header)
+            ctx.strokeStyle = '#ff0055';
+            ctx.beginPath();
+            ctx.moveTo(width, cy);
+            ctx.lineTo(width - (width/2 - stopPoint) * Math.min(linkProgress * 2, 1), cy);
+            ctx.stroke();
+
+            // Spark on Contact
+            if (linkProgress > 0.5) {
+                const sparkSize = (linkProgress - 0.5) * 40;
                 ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(width/2, centerY, 5 * (connectionProgress), 0, Math.PI*2);
-                ctx.fill();
-                // Glow
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = '#fff';
+                ctx.beginPath();
+                ctx.arc(width/2, cy, Math.random() * 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
             }
         }
 
         function animate() {
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
+            ctx.fillStyle = 'rgba(3, 3, 3, 0.25)';
             ctx.fillRect(0, 0, width, height);
-            
-            if (connectionProgress < 1) {
-                connectionProgress += 0.01;
-                drawPortLink();
+
+            if (linkProgress < 1) {
+                linkProgress += 0.008;
+                drawCircuitLink();
             } else {
-                // Connection complete -> Assemble names
-                ctx.shadowBlur = 0; 
+                // Convergence Phase
                 particles.forEach(p => {
                     if (p.delay > 0) {
                         p.delay--;
                     } else {
-                        p.x += (p.tx - p.x) * 0.06;
-                        p.y += (p.ty - p.y) * 0.06;
+                        // Advanced easing for crisp formation
+                        p.x += (p.tx - p.x) * p.friction;
+                        p.y += (p.ty - p.y) * p.friction;
                     }
-                    
+
                     ctx.fillStyle = p.color;
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     ctx.fill();
                 });
             }
+
             requestAnimationFrame(animate);
         }
 
-        window.addEventListener('resize', init);
+        window.addEventListener('resize', () => location.reload());
         init();
         animate();
     </script>
