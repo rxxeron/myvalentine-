@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promise Protocol: Holding Hands</title>
+    <title>Promise Protocol: Connection</title>
     <style>
         body {
             margin: 0;
-            background-color: #000;
+            background-color: #020202; /* Deep Void Black */
             overflow: hidden;
             font-family: 'Courier New', monospace;
             display: flex;
@@ -27,7 +27,7 @@
 
         #ui-container {
             position: absolute;
-            top: 60%; 
+            top: 65%; /* Sit below the main names */
             width: 100%;
             text-align: center;
             pointer-events: none;
@@ -36,14 +36,14 @@
 
         .main-title {
             color: #fff;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 4px;
             font-weight: 800;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
             margin-bottom: 15px;
             opacity: 0;
-            animation: fadeIn 1s ease forwards 4s; 
+            animation: fadeIn 1s ease forwards 4s; /* Wait for names to form */
         }
 
         .sub-text {
@@ -63,9 +63,9 @@
         @keyframes fadeIn { to { opacity: 1; } }
         
         @media (max-width: 600px) {
-            .main-title { font-size: 1.3rem; letter-spacing: 2px; }
+            .main-title { font-size: 1.2rem; letter-spacing: 2px; }
             .sub-text { font-size: 0.9rem; }
-            #ui-container { top: 58%; }
+            #ui-container { top: 60%; }
         }
     </style>
 </head>
@@ -89,8 +89,9 @@
         let particles = [];
         
         // --- SETTINGS ---
-        const DENSITY = 3; // Low value = Sharper hands
-        const PARTICLE_SIZE = 1.3;
+        const DENSITY = 4; // Lower = Sharper text (more particles)
+        const PARTICLE_SIZE = 1.5;
+        const TEXT = "Rakib + Nirjhora";
 
         function init() {
             width = window.innerWidth;
@@ -100,109 +101,56 @@
             createHologram();
         }
 
-        // --- DRAW LEFT HAND (Palm Up / Receiving) ---
-        function drawLeftHand(ctx, x, y, scale) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.scale(scale, scale);
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            
-            // Wrist
-            ctx.moveTo(-100, 40); 
-            ctx.lineTo(-40, 40);
-            
-            // Palm curing UP
-            ctx.bezierCurveTo(0, 40, 20, 30, 40, 10); // Fingers curling up
-            
-            // Finger Tips
-            ctx.bezierCurveTo(50, 0, 50, -10, 30, -15);
-            
-            // Top of hand / Thumb
-            ctx.bezierCurveTo(10, -10, -10, 0, -30, -20); // Thumb knuckle
-            ctx.bezierCurveTo(-40, -40, -20, -50, -10, -60); // Thumb tip up
-            
-            // Back to wrist
-            ctx.lineTo(-100, -20);
-            
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
-
-        // --- DRAW RIGHT HAND (Palm Down / Holding) ---
-        function drawRightHand(ctx, x, y, scale) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.scale(scale, scale); // No flip needed, drawing manually
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            
-            // Wrist (Coming from right)
-            ctx.moveTo(100, 30);
-            ctx.lineTo(40, 30);
-            
-            // Palm curving DOWN (to hold)
-            ctx.bezierCurveTo(0, 30, -20, 20, -40, 0); // Fingers curling down
-            
-            // Finger Tips (Overlapping left hand)
-            ctx.bezierCurveTo(-50, -10, -50, -20, -30, -25);
-            
-            // Top of hand
-            ctx.bezierCurveTo(-10, -20, 10, -10, 30, -30); // Knuckles
-            
-            // Thumb (Tucked under or side)
-            ctx.lineTo(40, -30);
-            
-            // Back to wrist
-            ctx.lineTo(100, -30);
-            
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
-
         function createHologram() {
             particles = [];
             ctx.clearRect(0, 0, width, height);
             
-            const scale = Math.min(width, height) / 300; 
-            const centerY = height / 2 - 50; 
-            const centerX = width / 2;
+            // 1. Draw Invisible Text to Scan
+            // Responsive font size
+            const fontSize = Math.min(width, height) / 8; 
+            ctx.font = `800 ${fontSize}px 'Segoe UI', sans-serif`;
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
             
-            // Draw Invisible Hands to Scan
-            // Left Hand (Cyan) - Slightly to left
-            drawLeftHand(ctx, centerX - 20 * scale, centerY, scale);
-            // Right Hand (Magenta) - Slightly to right & higher to "cover"
-            drawRightHand(ctx, centerX + 20 * scale, centerY - 10 * scale, scale);
+            // Draw it slightly above center
+            const centerY = height / 2 - 50;
+            ctx.fillText(TEXT, width / 2, centerY);
 
-            // Scan Pixels
+            // 2. Scan Pixels
             const data = ctx.getImageData(0, 0, width, height).data;
-            ctx.clearRect(0, 0, width, height); 
+            ctx.clearRect(0, 0, width, height); // Clear immediately
 
-            // Create Particles
+            // 3. Create Particles based on text pixels
             for (let y = 0; y < height; y += DENSITY) {
                 for (let x = 0; x < width; x += DENSITY) {
+                    // If pixel is not transparent
                     if (data[(y * width + x) * 4 + 3] > 128) {
                         
-                        // COLOR LOGIC
+                        // --- COLOR LOGIC ---
                         let color;
-                        // Since they overlap in the middle, we need a smart way to color them
-                        // If it's on the left side of screen -> Cyan
-                        // If it's on the right side -> Magenta
-                        // Overlap area -> White/Mixed
-                        
-                        if (x < centerX - 10 * scale) {
-                            color = 'rgba(0, 243, 255, 1)'; // Cyan Left Hand
-                        } else if (x > centerX + 10 * scale) {
-                            color = 'rgba(255, 0, 85, 1)'; // Magenta Right Hand
+                        const centerX = width / 2;
+                        // Define boundaries for coloring based on X position
+                        const splitWidth = fontSize * 2; 
+
+                        if (x < centerX - splitWidth/3) {
+                             // Left side (Rakib) -> Cyan
+                            color = 'rgba(0, 243, 255, 1)';
+                        } else if (x > centerX + splitWidth/3) {
+                             // Right side (Nirjhora) -> Magenta
+                            color = 'rgba(255, 0, 85, 1)';
                         } else {
-                            color = 'rgba(255, 255, 255, 1)'; // The "Touch" Zone
+                             // Center (+) -> White
+                            color = 'rgba(255, 255, 255, 1)';
                         }
 
-                        // Animation Start Positions
-                        let startX = (x < width / 2) ? -200 : width + 200;
-                        let startY = y + (Math.random() - 0.5) * 100;
+                        // --- ANIMATION START POSITIONS ---
+                        // Start random off-screen or scattered
+                        let startX = Math.random() * width;
+                        let startY = Math.random() * height;
+                        // Scatter them further away initially
+                        if (Math.random() > 0.5) startX += width; else startX -= width;
+                        if (Math.random() > 0.5) startY += height; else startY -= height;
 
                         particles.push(new Particle(startX, startY, x, y, color));
                     }
@@ -212,16 +160,18 @@
 
         class Particle {
             constructor(x, y, tx, ty, color) {
-                this.x = x;
+                this.x = x; // Current position
                 this.y = y;
-                this.tx = tx;
+                this.tx = tx; // Target position
                 this.ty = ty;
                 this.color = color;
                 this.size = Math.random() * PARTICLE_SIZE + 0.5;
-                this.speed = Math.random() * 0.03 + 0.02;
+                // Random speed for organic assembly feel
+                this.speed = Math.random() * 0.03 + 0.015; 
             }
 
             update() {
+                // Ease towards target position (Standard PID-like easing)
                 this.x += (this.tx - this.x) * this.speed;
                 this.y += (this.ty - this.y) * this.speed;
             }
@@ -235,15 +185,17 @@
         }
 
         function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            // Trail Effect (Motion Blur)
+            ctx.fillStyle = 'rgba(2, 2, 2, 0.2)';
             ctx.fillRect(0, 0, width, height);
+
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', init);
         init();
-        animate();
+        setTimeout(animate, 500); // Slight delay before animation starts
     </script>
 </body>
 </html>
