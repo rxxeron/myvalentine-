@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loveflix | Rakib & Nirjhora</title>
     <style>
-        :root { --netflix-red: #E50914; --bg-black: #141414; --cyan: #00f3ff; --pink: #ff0055; }
+        :root { --netflix-red: #E50914; --bg-black: #141414; }
         body { margin: 0; padding: 0; background-color: var(--bg-black); color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; overflow-x: hidden; }
 
         /* --- STORY MODE --- */
-        #story-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #1e1e1e; font-family: 'Courier New', monospace; z-index: 2000; position: relative; }
+        #story-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #1e1e1e; font-family: 'Courier New', monospace; }
         .avatar { font-size: 80px; margin-bottom: 20px; }
         .bubble { background: white; color: black; padding: 15px; border-radius: 20px; font-size: 1.1rem; position: relative; margin-bottom: 20px; font-weight: bold; }
         .code-screen { background: #2d2d2d; border: 2px solid #555; padding: 10px; width: 300px; height: 150px; font-size: 0.8rem; color: #00ff00; display: none; overflow: hidden; border-radius: 5px; text-align: left; }
@@ -22,34 +22,41 @@
         .description { width: 60%; font-size: 1.2rem; margin: 20px 0; color: #dcdcdc; }
         .btn { padding: 12px 25px; font-size: 1.1rem; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; font-weight: bold; }
         .btn-play { background: white; color: black; }
+        
         .row-title { padding-left: 40px; margin-top: 30px; font-size: 1.4rem; color: #e5e5e5; }
         .row { display: flex; overflow-x: auto; padding: 20px 40px; gap: 15px; scrollbar-width: none; }
-        .ep-card { min-width: 250px; background: #2f2f2f; border-radius: 4px; cursor: pointer; transition: 0.3s; overflow: hidden; position: relative; }
+        .ep-card { min-width: 260px; background: #2f2f2f; border-radius: 4px; cursor: pointer; transition: 0.3s; overflow: hidden; }
         .ep-card:hover { transform: scale(1.05); z-index: 10; border: 2px solid white; }
-        .ep-thumb { height: 140px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: #444; }
+        .ep-thumb { height: 140px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: #333; }
         .locked { filter: grayscale(1) brightness(0.5); pointer-events: none; }
         .ep-info { padding: 12px; }
-        .ep-title { font-weight: bold; font-size: 0.9rem; }
+        .ep-title { font-weight: bold; font-size: 0.95rem; }
 
-        /* --- ANIMATION MODAL --- */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; overflow: hidden; }
-        #modal-content { text-align: center; position: relative; z-index: 3001; width: 90%; }
-        .particle { position: absolute; pointer-events: none; animation: fall linear infinite; z-index: 3005; }
+        /* --- VIDEO PLAYER MODAL --- */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; flex-direction: column; }
+        
+        /* Video Container */
+        .video-wrapper { position: relative; width: 90%; max-width: 800px; z-index: 3002; box-shadow: 0 0 30px rgba(229, 9, 20, 0.5); border-radius: 8px; overflow: hidden; }
+        video { width: 100%; display: block; }
+
+        /* Text Below Video */
+        #m-title { margin-top: 20px; font-size: 1.5rem; color: white; z-index: 3002; }
+        #m-text { color: #ccc; margin-top: 5px; z-index: 3002; }
+
+        /* Falling Particles */
+        .particle { position: absolute; pointer-events: none; animation: fall linear infinite; z-index: 3001; }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
-        /* Custom Hand Animation for Hug Day */
-        .hand-container { display: flex; justify-content: space-around; width: 100%; max-width: 400px; margin: 20px auto; opacity: 0; }
-        .hand-anim { font-size: 5rem; animation: hugMove 2s forwards; }
-        @keyframes hugMove { 0% { transform: translateX(-100px); opacity: 0; } 100% { transform: translateX(30px); opacity: 1; } }
-        @keyframes hugMoveRight { 0% { transform: translateX(100px); opacity: 0; } 100% { transform: translateX(-30px); opacity: 1; } }
+        .close-btn { margin-top: 20px; padding: 10px 25px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; z-index: 3002; }
+        .close-btn:hover { background: var(--netflix-red); border-color: var(--netflix-red); }
 
-        .close-btn { margin-top: 30px; padding: 10px 25px; background: var(--netflix-red); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        @media (max-width: 600px) { h1 { font-size: 2.5rem; } .description { width: 100%; } .hero { height: 50vh; } }
     </style>
 </head>
 <body>
 
     <div id="story-container">
-        <div class="bubble" id="thought-bubble">Just solving a Codeforces problem...</div>
+        <div class="bubble" id="thought-bubble">Solving Codeforces...</div>
         <div class="avatar" id="avatar">🧑‍💻</div>
         <div class="code-screen" id="terminal"></div>
         <div class="progress-bar" id="loader"></div>
@@ -58,33 +65,37 @@
     <div id="loveflix-container">
         <div class="hero">
             <h1>LOVEFLIX</h1>
-            <p class="description">He's an ICE engineer. She's his favorite bug. Catch the latest episodes of their journey at East West University.</p>
+            <p class="description">He's an ICE engineer. She's his favorite bug. A series about life, code, and love at East West University.</p>
             <button class="btn btn-play" onclick="playToday()">▶ Play Today's Episode</button>
         </div>
-
-        <div class="row-title">Season 2026: Valentine Collection</div>
+        <div class="row-title">Season 2026: Valentine Week</div>
         <div class="row" id="episode-list"></div>
     </div>
 
     <div id="modal">
-        <div id="modal-content">
-            <h1 id="m-title" style="color: white; font-size: 2.5rem;"></h1>
-            <p id="m-text" style="font-size: 1.3rem; margin: 20px 0; color: #ccc;"></p>
-            <div id="custom-animation-zone"></div>
-            <button class="close-btn" onclick="closeModal()">Close Player</button>
+        <div class="video-wrapper">
+            <video id="main-video" controls playsinline>
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
+        <div id="m-title"></div>
+        <div id="m-text"></div>
+        <button class="close-btn" onclick="closeModal()">Close Player</button>
     </div>
 
     <script>
+        // --- DATA CONFIGURATION ---
+        // Ensure filenames match EXACTLY what is in your folder
         const episodes = [
-            { day: 7, title: "Rose Day", msg: "A shower of digital roses for my favorite person.", icon: "🌹", type: "shower", emoji: "🌹" },
-            { day: 8, title: "Propose Day", msg: "Requesting a lifetime merge with your heart.", icon: "💍", type: "shower", emoji: "💍" },
-            { day: 9, title: "Chocolate Day", msg: "You're sweeter than any syntax sugar.", icon: "🍫", type: "shower", emoji: "🍫" },
-            { day: 10, title: "Teddy Day", msg: "A virtual hug in teddy form for you.", icon: "🧸", type: "shower", emoji: "🧸" },
-            { day: 11, title: "Promise Day", msg: "I promise to debug your code and buy snacks from the EWU Cafeteria.", icon: "🤝", type: "hug" }, // TODAY
-            { day: 12, title: "Hug Day", msg: "System linking... Hug successfully transmitted.", icon: "🤗", type: "hug" },
-            { day: 13, title: "Kiss Day", msg: "Sending binary kisses across the EWU network.", icon: "💋", type: "shower", emoji: "💋" },
-            { day: 14, title: "Valentine's Day", msg: "Md Rakibul Hasan ❤️ Nirjhora: Forever Synchronized.", icon: "❤️", type: "shower", emoji: "❤️" }
+            { day: 7, title: "Rose Day", msg: "A rose for you.", icon: "🌹", file: "Rosa Day.mp4", emoji: "🌹" },
+            { day: 8, title: "Propose Day", msg: "Will you be my Player 2?", icon: "💍", file: "propose day.mp4", emoji: "💍" },
+            { day: 9, title: "Chocolate Day", msg: "Sweets for the sweet.", icon: "🍫", file: "Chocolate day.mp4", emoji: "🍫" },
+            { day: 10, title: "Teddy Day", msg: "A warm hug.", icon: "🧸", file: "Teddy Day.mp4", emoji: "🧸" }, 
+            { day: 11, title: "Promise Day", msg: "I promise to debug your code.", icon: "🤝", file: "promise day.mp4", emoji: "✨" }, 
+            { day: 12, title: "Hug Day", msg: "Connection established.", icon: "🤗", file: "Hug Day.mp4", emoji: "🤗" },
+            { day: 13, title: "Kiss Day", msg: "Binary kisses.", icon: "💋", file: "kiss day.mp4", emoji: "💋" },
+            { day: 14, title: "Valentine's Day", msg: "Forever Us.", icon: "❤️", file: "valentine day.mp4", emoji: "❤️" }
         ];
 
         const today = new Date();
@@ -103,16 +114,17 @@
             const terminal = document.getElementById('terminal');
             
             setTimeout(() => { avatar.innerText = "😱"; bubble.innerText = "WAIT! It's Valentine's Week?!"; }, 2500);
-            setTimeout(() => { avatar.innerText = "👨‍💻"; bubble.style.display = 'none'; terminal.style.display = 'block'; typeCode(); }, 5000);
+            setTimeout(() => { avatar.innerText = "🏃‍♂️"; bubble.innerText = "Deploying Surprise..."; }, 5000);
+            setTimeout(() => { avatar.innerText = "👨‍💻"; bubble.style.display = 'none'; terminal.style.display = 'block'; typeCode(); }, 7000);
         }
 
         function typeCode() {
-            const lines = ["> git init love", "> import heart", "> while(alive) { love++ }", "> deploying Loveflix..."];
+            const lines = ["> git init love", "> import video_assets", "> linking 'Rosa Day.mp4'...", "> deploying Loveflix..."];
             let i = 0;
             let itv = setInterval(() => {
                 if(i < lines.length) { document.getElementById('terminal').innerHTML += lines[i] + "<br>"; i++; }
                 else { clearInterval(itv); document.getElementById('loader').style.width = "100%"; setTimeout(showLoveflix, 1500); }
-            }, 700);
+            }, 800);
         }
 
         function showLoveflix() {
@@ -126,41 +138,52 @@
             const list = document.getElementById('episode-list');
             episodes.forEach(ep => {
                 const card = document.createElement('div');
-                card.className = `ep-card ${currentDay < ep.day ? 'locked' : ''}`;
+                // Lock logic: Only unlock days up to today
+                const isLocked = currentDay < ep.day;
+                card.className = `ep-card ${isLocked ? 'locked' : ''}`;
                 card.innerHTML = `<div class="ep-thumb">${ep.icon}</div><div class="ep-info"><div class="ep-title">${ep.title}</div></div>`;
-                card.onclick = () => openPlayer(ep);
+                if (!isLocked) card.onclick = () => openPlayer(ep);
                 list.appendChild(card);
             });
         }
 
-        // --- PLAYER & ANIMATION ENGINE ---
+        // --- VIDEO PLAYER & ANIMATION ---
         function openPlayer(ep) {
             const modal = document.getElementById('modal');
-            const zone = document.getElementById('custom-animation-zone');
+            const video = document.getElementById('main-video');
+            
             modal.style.display = 'flex';
             document.getElementById('m-title').innerText = ep.title;
             document.getElementById('m-text').innerText = ep.msg;
-            zone.innerHTML = "";
 
-            if (ep.type === "shower") {
-                for(let i=0; i<30; i++) {
-                    const p = document.createElement('div');
-                    p.className = 'particle';
-                    p.innerText = ep.emoji;
-                    p.style.left = Math.random() * 100 + 'vw';
-                    p.style.fontSize = (Math.random() * 20 + 20) + 'px';
-                    p.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    p.style.top = '-50px';
-                    modal.appendChild(p);
-                }
-            } else if (ep.type === "hug") {
-                zone.innerHTML = `
-                    <div class="hand-container" style="opacity:1">
-                        <div class="hand-anim">🤝</div>
-                    </div>
-                    <p style="color:#00ffcc; font-family:monospace;">[ STATUS: PROMISE_SYNC_100% ]</p>
-                `;
+            // Load Video
+            video.src = ep.file;
+            video.load();
+
+            // Start Shower Animation
+            startShower(ep.emoji);
+
+            // STOP Shower when video plays
+            video.onplay = () => stopShower();
+        }
+
+        function startShower(emoji) {
+            // Create particles
+            for(let i=0; i<40; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.innerText = emoji;
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                p.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                p.style.top = '-50px';
+                document.getElementById('modal').appendChild(p);
             }
+        }
+
+        function stopShower() {
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach(p => p.remove());
         }
 
         function playToday() {
@@ -169,8 +192,11 @@
         }
 
         function closeModal() {
+            const video = document.getElementById('main-video');
+            video.pause();
+            video.src = ""; // Stop buffering
             document.getElementById('modal').style.display = 'none';
-            document.querySelectorAll('.particle').forEach(p => p.remove());
+            stopShower(); // Clear any remaining particles
         }
     </script>
 </body>
