@@ -3,344 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loveflix: The Series</title>
+    <title>Protocol: LOVE</title>
     <style>
         body {
             margin: 0;
-            background-color: #141414;
-            color: white;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Courier New', Courier, monospace;
         }
-        
-        /* HERO SECTION */
-        .hero {
-            height: 75vh;
-            /* PRO TIP: Replace this URL with a photo of YOU TWO for maximum effect */
-            background: linear-gradient(to top, #141414, transparent), 
-                        url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop'); 
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 40px;
+        canvas {
+            display: block;
         }
-
+        #ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none; /* Let clicks pass through to canvas */
+            z-index: 10;
+        }
         h1 {
-            font-size: 5rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #E50914; 
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
-            font-weight: 800;
-        }
-
-        .meta {
-            font-size: 1.2rem;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .match-score { color: #46d369; font-weight: bold; }
-        .rating { border: 1px solid white; padding: 0 5px; font-size: 0.9rem; }
-
-        .description {
-            width: 60%;
-            font-size: 1.3rem;
-            line-height: 1.4;
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 5px black;
-            color: #dcdcdc;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-play { background: white; color: black; transition: 0.2s; }
-        .btn-play:hover { background: #c8c8c8; }
-        
-        .btn-info { background: rgba(109, 109, 110, 0.7); color: white; transition: 0.2s;}
-        .btn-info:hover { background: rgba(109, 109, 110, 0.4); }
-
-        /* EPISODES SLIDER */
-        .episodes-title { padding-left: 40px; margin-top: 10px; font-size: 1.5rem; color: #e5e5e5; }
-        
-        .row {
-            display: flex;
-            overflow-x: auto;
-            padding: 20px 40px;
-            gap: 10px;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
-        }
-        .row::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
-
-        .episode-card {
-            min-width: 300px;
-            background: #2f2f2f;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: transform 0.3s;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .episode-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 0 20px rgba(0,0,0,0.7); }
-
-        /* Thumbnail Top */
-        .ep-thumb {
-            height: 160px;
-            background: #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: white;
             font-size: 3rem;
-            position: relative;
+            text-shadow: 0 0 20px #ff0055;
+            margin: 0;
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 2s;
         }
-        
-        /* Locked State */
-        .locked .ep-thumb { filter: grayscale(100%) brightness(0.5); }
-        .locked-icon { position: absolute; font-size: 2.5rem; }
-
-        /* Episode Info Bottom */
-        .ep-info { padding: 15px; }
-        .ep-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; display: flex; justify-content: space-between;}
-        .ep-desc { font-size: 0.9rem; color: #a3a3a3; line-height: 1.3; }
-        .ep-duration { font-size: 0.8rem; color: #666; margin-top: 10px; }
-
-        /* MODAL */
-        #modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
+        p {
+            color: #00ffcc;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 3s;
         }
-        
-        #modal-card {
-            background: #181818;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(229, 9, 20, 0.3);
-            animation: slideUp 0.4s ease;
+        .code-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(0, 255, 0, 0.3);
+            font-size: 10px;
         }
-
-        .modal-header {
-            height: 150px;
-            background: linear-gradient(to bottom, var(--theme-color), #181818);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-        }
-
-        .modal-body { padding: 30px; text-align: center; }
-        .modal-title { font-size: 1.8rem; margin-bottom: 15px; font-weight: bold; }
-        .modal-text { font-size: 1.2rem; color: #dcdcdc; line-height: 1.5; }
-        
-        .close-btn {
-            margin-top: 25px;
-            padding: 10px 30px;
-            background: white;
-            color: black;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            h1 { font-size: 3rem; }
-            .description { width: 100%; font-size: 1rem; }
-            .hero { height: 60vh; }
-        }
+        @keyframes fadeIn { to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="hero">
-        <h1>US &lt;/&gt;</h1>
-        <div class="meta">
-            <span class="match-score">100% Match</span>
-            <span class="rating">U/A 18+</span>
-            <span>Limited Series</span>
-            <span>4K HDR</span>
-        </div>
-        <p class="description">
-            He's an engineer. She's his favorite bug. Watch as they navigate the complex algorithm of love, from initial commits to the final deployment.
-            <br><strong>#1 Trending in Your Heart</strong>
-        </p>
-        <div>
-            <button class="btn btn-play" onclick="playToday()">▶ Play Season 1</button>
-            <button class="btn btn-info">ℹ More Info</button>
-        </div>
+    <div id="ui">
+        <h1 id="day-title">Loading...</h1>
+        <p id="day-msg">Calculating Heart Trajectory...</p>
+    </div>
+    
+    <div class="code-overlay">
+        System.out.println("She is the bug that became a feature.");
     </div>
 
-    <div class="episodes-title">Episodes</div>
-    <div class="row" id="episode-list">
-        </div>
-
-    <div id="modal">
-        <div id="modal-card">
-            <div class="modal-header" id="m-header"></div>
-            <div class="modal-body">
-                <div class="modal-title" id="m-title"></div>
-                <div class="modal-text" id="m-text"></div>
-                <button class="close-btn" onclick="closeModal()">Close</button>
-            </div>
-        </div>
-    </div>
+    <canvas id="canvas"></canvas>
 
     <script>
-        // --- RAKIBUL'S CUSTOM CONTENT ---
-        // customize these descriptions to match your real style!
-        const episodes = [
-            { 
-                day: 7, 
-                title: "Ep 1: The Rose Variable", 
-                desc: "Every great project starts with an initialization. Here is a rose to start our main() function.", 
-                msg: "🌹 You are the constant variable in my chaotic code.", 
-                color: "#ff4757", 
-                icon: "🌹"
-            },
-            { 
-                day: 8, 
-                title: "Ep 2: The Merge Request", 
-                desc: "A proposal to merge our branches forever. No conflicts detected.", 
-                msg: "💍 Will you accept my pull request to be with you forever?", 
-                color: "#7bed9f", 
-                icon: "💍"
-            },
-            { 
-                day: 9, 
-                title: "Ep 3: Sweet Syntax", 
-                desc: "Debugging life requires something sweet. Compiling chocolates...", 
-                msg: "🍫 Life throws exceptions, but you are my sweetest catch block.", 
-                color: "#e056fd", 
-                icon: "🍫"
-            },
-            { 
-                day: 10, 
-                title: "Ep 4: Soft Ware", 
-                desc: "Sometimes hardware isn't enough. Deploying soft teddy hugs.", 
-                msg: "🧸 I can't be there physically, so I sent this virtual agent to hug you.", 
-                color: "#f0932b", 
-                icon: "🧸"
-            },
-            { 
-                day: 11, 
-                title: "Ep 5: The Promise Protocol", // TODAY
-                desc: "A promise is an object representing the eventual completion of an asynchronous operation... or my love.", 
-                msg: "🤞 I promise to handle your errors and never let your heart crash.", 
-                color: "#22a6b3", 
-                icon: "🤞"
-            },
-            { 
-                day: 12, 
-                title: "Ep 6: Infinite Loop", 
-                desc: "While(alive) { hug(you); } // A loop that never breaks.", 
-                msg: "🤗 My arms are the only braces {} you need.", 
-                color: "#be2edd", 
-                icon: "🤗"
-            },
-            { 
-                day: 13, 
-                title: "Ep 7: Kiss Compilation", 
-                desc: "Binary kisses transmitted over the network. Latency: 0ms.", 
-                msg: "💋 Sending packets of love directly to your localhost.", 
-                color: "#eb4d4b", 
-                icon: "💋"
-            },
-            { 
-                day: 14, 
-                title: "Season Finale: Deployment", 
-                desc: "The big day. The system is live. Status: 200 OK.", 
-                msg: "❤️ You are my favorite project, my best code, and my only Valentine.", 
-                color: "#badc58", 
-                icon: "💑"
-            }
-        ];
+        // --- CONFIGURATION FOR THE ENGINEER ---
+        const PARTICLE_COUNT = 1500; // Increase for more density (heavier on CPU)
+        const HEART_COLOR = "#ff0055";
+        const CORE_COLOR = "#ffffff";
+        
+        // --- DATE LOGIC ---
+        const days = {
+            7:  { title: "Rose Day", msg: "Math.cos(you) + Math.sin(me) = 1" },
+            8:  { title: "Propose Day", msg: "bool together = true;" },
+            9:  { title: "Chocolate Day", msg: "You are sweeter than syntax sugar." },
+            10: { title: "Teddy Day", msg: "Runtime Environment: Warm & Cozy" },
+            11: { title: "Promise Day", msg: "try { love() } catch { never_break() }" }, // TODAY
+            12: { title: "Hug Day", msg: "Connecting to server... Hug sent." },
+            13: { title: "Kiss Day", msg: "101010 *Kiss* 010101" },
+            14: { title: "Valentine's Day", msg: "You are my favorite algorithm." }
+        };
 
-        // --- LOGIC ---
         const today = new Date();
         const currentDay = today.getDate();
-        // const currentDay = 11; // UNCOMMENT TO TEST DIFFERENT DAYS
+        // const currentDay = 11; // Uncomment to test
 
-        const list = document.getElementById('episode-list');
-        const modal = document.getElementById('modal');
-        const mHeader = document.getElementById('m-header');
-        const mTitle = document.getElementById('m-title');
-        const mText = document.getElementById('m-text');
+        // Set Text
+        const dayData = days[currentDay] || { title: "Infinite Loop", msg: "Loving you..." };
+        document.getElementById('day-title').innerText = dayData.title;
+        document.getElementById('day-msg').innerText = dayData.msg;
 
-        // Render Episodes
-        episodes.forEach(ep => {
-            const isLocked = currentDay < ep.day;
-            const card = document.createElement('div');
-            card.className = `episode-card ${isLocked ? 'locked' : ''}`;
-            
-            card.innerHTML = `
-                <div class="ep-thumb" style="background: ${isLocked ? '#333' : ep.color}">
-                    ${isLocked ? '<span class="locked-icon">🔒</span>' : ep.icon}
-                </div>
-                <div class="ep-info">
-                    <div class="ep-title">${ep.title}</div>
-                    <div class="ep-desc">${isLocked ? "Available on Feb " + ep.day : ep.desc}</div>
-                    <div class="ep-duration">24m</div>
-                </div>
-            `;
-
-            if (!isLocked) {
-                card.onclick = () => openModal(ep);
-            }
-            list.appendChild(card);
-        });
-
-        function playToday() {
-            const ep = episodes.find(e => e.day === currentDay);
-            if (ep) openModal(ep);
-            else if (currentDay > 14) openModal(episodes[7]); // Show finale if late
-        }
-
-        function openModal(ep) {
-            modal.style.display = 'flex';
-            mHeader.style.background = ep.color;
-            mHeader.innerHTML = ep.icon;
-            mTitle.innerText = ep.title;
-            mText.innerText = ep.msg;
-            document.documentElement.style.setProperty('--theme-color', ep.color);
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-        }
+        // --- CANVAS SETUP ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
         
-        // Close modal on outside click
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- PHYSICS ENGINE ---
+        const particles = [];
+
+        // The Heart Formula (Parametric Equation)
+        // x = 16sin^3(t)
+        // y = 13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)
+        function getHeartPoint(t, scale) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+            return {
+                x: x * scale + width / 2,
+                y: -y * scale + height / 2 // Flip Y because canvas Y grows downwards
+            };
+        }
+
+        class Particle {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                // Start random
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                
+                // Target position (Heart shape)
+                const t = Math.random() * Math.PI * 2;
+                // Randomly distribute particles inside vs outline
+                const r = Math.random();
+                const scale = (Math.min(width, height) / 35) * (0.5 + 0.5 * Math.sqrt(r)); 
+                
+                const pos = getHeartPoint(t, scale);
+                this.targetX = pos.x;
+                this.targetY = pos.y;
+                
+                this.velX = 0;
+                this.velY = 0;
+                this.size = Math.random() * 2 + 0.5;
+                this.speed = Math.random() * 0.05 + 0.02;
+            }
+
+            update(time) {
+                // Physics: Move towards target with easing
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                
+                this.x += dx * this.speed;
+                this.y += dy * this.speed;
+
+                // Add "Heartbeat" effect using Sine wave
+                const beat = Math.sin(time * 3) * 0.5 + 1; // Pulse 
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                // Slight expansion/contraction from center
+                const distToCenter = Math.sqrt((this.x - centerX)**2 + (this.y - centerY)**2);
+                if (distToCenter < 200) {
+                     // Add subtle pulse motion
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = Math.random() > 0.9 ? CORE_COLOR : HEART_COLOR;
+                ctx.fill();
             }
         }
+
+        // Initialize Particles
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new Particle());
+        }
+
+        // --- ANIMATION LOOP ---
+        let time = 0;
+        function animate() {
+            // Trail effect (drawing semi-transparent rectangle over previous frame)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+
+            time += 0.01;
+
+            particles.forEach(p => {
+                p.update(time);
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Interaction: Explode on Click
+        window.addEventListener('click', () => {
+            particles.forEach(p => {
+                p.x = Math.random() * width;
+                p.y = Math.random() * height;
+            });
+        });
     </script>
 </body>
 </html>
