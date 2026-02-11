@@ -5,105 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loveflix | Rakib & Nirjhora</title>
     <style>
-        :root {
-            --netflix-red: #E50914;
-            --bg-black: #141414;
-        }
+        :root { --netflix-red: #E50914; --bg-black: #141414; --cyan: #00f3ff; --pink: #ff0055; }
+        body { margin: 0; padding: 0; background-color: var(--bg-black); color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; overflow-x: hidden; }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-black);
-            color: #ffffff;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* --- STORY MODE STYLES --- */
-        #story-container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #1e1e1e;
-            font-family: 'Courier New', monospace;
-        }
-
-        .avatar { font-size: 80px; margin-bottom: 20px; transition: all 0.5s; }
-        .bubble {
-            background: white; color: black; padding: 15px;
-            border-radius: 20px; font-size: 1.1rem; position: relative;
-            margin-bottom: 20px; font-weight: bold;
-        }
-        .bubble::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%;
-            border-width: 10px 10px 0; border-style: solid;
-            border-color: white transparent; display: block; width: 0;
-        }
-
-        .code-screen {
-            background: #2d2d2d; border: 2px solid #555; padding: 10px;
-            width: 300px; height: 150px; text-align: left;
-            font-size: 0.8rem; color: #00ff00; display: none;
-            overflow: hidden; border-radius: 5px;
-        }
+        /* --- STORY MODE --- */
+        #story-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #1e1e1e; font-family: 'Courier New', monospace; z-index: 2000; position: relative; }
+        .avatar { font-size: 80px; margin-bottom: 20px; }
+        .bubble { background: white; color: black; padding: 15px; border-radius: 20px; font-size: 1.1rem; position: relative; margin-bottom: 20px; font-weight: bold; }
+        .code-screen { background: #2d2d2d; border: 2px solid #555; padding: 10px; width: 300px; height: 150px; font-size: 0.8rem; color: #00ff00; display: none; overflow: hidden; border-radius: 5px; text-align: left; }
         .progress-bar { width: 0%; height: 5px; background: #00ff00; margin-top: 10px; transition: width 2s; }
 
-        /* --- LOVEFLIX UI STYLES --- */
+        /* --- LOVEFLIX UI --- */
         #loveflix-container { display: none; }
-
-        .hero {
-            height: 70vh;
-            background: linear-gradient(to top, var(--bg-black), transparent), 
-                        url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop'); 
-            background-size: cover; background-position: center;
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 40px;
-        }
-
+        .hero { height: 70vh; background: linear-gradient(to top, var(--bg-black), transparent), url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; }
         h1 { font-size: 4rem; margin: 0; color: var(--netflix-red); letter-spacing: 2px; }
         .description { width: 60%; font-size: 1.2rem; margin: 20px 0; color: #dcdcdc; }
-
-        .btn {
-            padding: 12px 25px; font-size: 1.1rem; border: none; border-radius: 4px;
-            cursor: pointer; margin-right: 10px; font-weight: bold;
-        }
+        .btn { padding: 12px 25px; font-size: 1.1rem; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; font-weight: bold; }
         .btn-play { background: white; color: black; }
-        .btn-info { background: rgba(109, 109, 110, 0.7); color: white; }
-
         .row-title { padding-left: 40px; margin-top: 30px; font-size: 1.4rem; color: #e5e5e5; }
-        .row { display: flex; overflow-x: auto; padding: 20px 40px; gap: 10px; scrollbar-width: none; }
-        .row::-webkit-scrollbar { display: none; }
-
-        .ep-card {
-            min-width: 280px; background: #2f2f2f; border-radius: 4px;
-            cursor: pointer; transition: transform 0.3s; overflow: hidden;
-        }
+        .row { display: flex; overflow-x: auto; padding: 20px 40px; gap: 15px; scrollbar-width: none; }
+        .ep-card { min-width: 250px; background: #2f2f2f; border-radius: 4px; cursor: pointer; transition: 0.3s; overflow: hidden; position: relative; }
         .ep-card:hover { transform: scale(1.05); z-index: 10; border: 2px solid white; }
-        .ep-thumb { height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
-        .locked .ep-thumb { filter: grayscale(100%) brightness(0.4); }
-        .lock-icon { position: absolute; font-size: 2rem; }
-        .ep-info { padding: 15px; }
-        .ep-title { font-weight: bold; margin-bottom: 5px; }
-        .ep-desc { font-size: 0.85rem; color: #a3a3a3; }
+        .ep-thumb { height: 140px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: #444; }
+        .locked { filter: grayscale(1) brightness(0.5); pointer-events: none; }
+        .ep-info { padding: 12px; }
+        .ep-title { font-weight: bold; font-size: 0.9rem; }
 
-        /* MODAL */
-        #modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center;
-        }
-        #modal-card { background: #181818; width: 90%; max-width: 450px; border-radius: 10px; padding: 30px; text-align: center; }
-        .close-btn { margin-top: 20px; padding: 10px 20px; background: var(--netflix-red); color: white; border: none; border-radius: 4px; cursor: pointer; }
+        /* --- ANIMATION MODAL --- */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; overflow: hidden; }
+        #modal-content { text-align: center; position: relative; z-index: 3001; width: 90%; }
+        .particle { position: absolute; pointer-events: none; animation: fall linear infinite; z-index: 3005; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
-        @media (max-width: 600px) { h1 { font-size: 2.5rem; } .description { width: 100%; } .hero { height: 60vh; } }
+        /* Custom Hand Animation for Hug Day */
+        .hand-container { display: flex; justify-content: space-around; width: 100%; max-width: 400px; margin: 20px auto; opacity: 0; }
+        .hand-anim { font-size: 5rem; animation: hugMove 2s forwards; }
+        @keyframes hugMove { 0% { transform: translateX(-100px); opacity: 0; } 100% { transform: translateX(30px); opacity: 1; } }
+        @keyframes hugMoveRight { 0% { transform: translateX(100px); opacity: 0; } 100% { transform: translateX(-30px); opacity: 1; } }
+
+        .close-btn { margin-top: 30px; padding: 10px 25px; background: var(--netflix-red); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <button id="replay-btn" style="position:fixed; bottom:20px; right:20px; z-index:2000; background:none; border:1px solid white; color:white; padding:5px 10px; cursor:pointer;" onclick="resetStory()">Reset Site</button>
-
     <div id="story-container">
-        <div class="bubble" id="thought-bubble">Initializing...</div>
+        <div class="bubble" id="thought-bubble">Just solving a Codeforces problem...</div>
         <div class="avatar" id="avatar">🧑‍💻</div>
         <div class="code-screen" id="terminal"></div>
         <div class="progress-bar" id="loader"></div>
@@ -111,118 +57,121 @@
 
     <div id="loveflix-container">
         <div class="hero">
-            <h1>OUR STORY</h1>
-            <p class="description">He's an ICE engineer. She's his favorite bug. Watch as they navigate life together at EWU, one commit at a time.</p>
-            <div>
-                <button class="btn btn-play" onclick="playCurrentDay()">▶ Play Latest Episode</button>
-                <button class="btn btn-info">ℹ More Info</button>
-            </div>
+            <h1>LOVEFLIX</h1>
+            <p class="description">He's an ICE engineer. She's his favorite bug. Catch the latest episodes of their journey at East West University.</p>
+            <button class="btn btn-play" onclick="playToday()">▶ Play Today's Episode</button>
         </div>
 
-        <div class="row-title">Season 2026: Valentine Week</div>
+        <div class="row-title">Season 2026: Valentine Collection</div>
         <div class="row" id="episode-list"></div>
     </div>
 
     <div id="modal">
-        <div id="modal-card">
-            <h2 id="m-title"></h2>
-            <p id="m-text" style="font-size: 1.2rem; line-height: 1.6;"></p>
-            <button class="close-btn" onclick="closeModal()">Close Episode</button>
+        <div id="modal-content">
+            <h1 id="m-title" style="color: white; font-size: 2.5rem;"></h1>
+            <p id="m-text" style="font-size: 1.3rem; margin: 20px 0; color: #ccc;"></p>
+            <div id="custom-animation-zone"></div>
+            <button class="close-btn" onclick="closeModal()">Close Player</button>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
         const episodes = [
-            { day: 7, title: "Ep 1: The Initial Commit", msg: "🌹 Like a rose, our love is growing one line of code at a time.", icon: "🌹" },
-            { day: 8, title: "Ep 2: The Merge Request", msg: "💍 Requesting to merge our branches forever. No conflicts detected.", icon: "💍" },
-            { day: 9, title: "Ep 3: Sugar Syntax", msg: "🍫 You are sweeter than a clean build on the first try.", icon: "🍫" },
-            { day: 10, title: "Ep 4: Virtual Support", msg: "🧸 Sending high-priority teddy hugs to your localhost.", icon: "🧸" },
-            { day: 11, title: "Ep 5: The Promise Protocol", msg: "🤞 I promise to debug your code and buy snacks from the EWU Cafeteria.", icon: "🤞" }, // TODAY
-            { day: 12, title: "Ep 6: Infinite Loop", msg: "🤗 While(alive) { hug(you); } // A loop that never breaks.", icon: "🤗" },
-            { day: 13, title: "Ep 7: Compiled Kisses", msg: "💋 Transmitting binary kisses over the network. Latency: 0ms.", icon: "💋" },
-            { day: 14, title: "Ep 8: The Production Release", msg: "❤️ Happy Valentine's Day! You are my favorite project forever.", icon: "❤️" }
+            { day: 7, title: "Rose Day", msg: "A shower of digital roses for my favorite person.", icon: "🌹", type: "shower", emoji: "🌹" },
+            { day: 8, title: "Propose Day", msg: "Requesting a lifetime merge with your heart.", icon: "💍", type: "shower", emoji: "💍" },
+            { day: 9, title: "Chocolate Day", msg: "You're sweeter than any syntax sugar.", icon: "🍫", type: "shower", emoji: "🍫" },
+            { day: 10, title: "Teddy Day", msg: "A virtual hug in teddy form for you.", icon: "🧸", type: "shower", emoji: "🧸" },
+            { day: 11, title: "Promise Day", msg: "I promise to debug your code and buy snacks from the EWU Cafeteria.", icon: "🤝", type: "hug" }, // TODAY
+            { day: 12, title: "Hug Day", msg: "System linking... Hug successfully transmitted.", icon: "🤗", type: "hug" },
+            { day: 13, title: "Kiss Day", msg: "Sending binary kisses across the EWU network.", icon: "💋", type: "shower", emoji: "💋" },
+            { day: 14, title: "Valentine's Day", msg: "Md Rakibul Hasan ❤️ Nirjhora: Forever Synchronized.", icon: "❤️", type: "shower", emoji: "❤️" }
         ];
 
         const today = new Date();
-        const currentDay = today.getDate(); // e.g. 11
-        // const currentDay = 11; // TEST MODE
+        const currentDay = today.getDate();
+        // const currentDay = 11; // UNCOMMENT TO TEST
 
-        // --- DOM ---
-        const story = document.getElementById('story-container');
-        const loveflix = document.getElementById('loveflix-container');
-        const terminal = document.getElementById('terminal');
-        const bubble = document.getElementById('thought-bubble');
-        const avatar = document.getElementById('avatar');
-        const loader = document.getElementById('loader');
+        // --- STORY LOGIC ---
+        window.onload = () => {
+            if (localStorage.getItem('seenIntro')) return showLoveflix();
+            playIntro();
+        };
 
-        // --- INIT ---
-        if (!localStorage.getItem('hasSeenIntro')) {
-            playStory();
-        } else {
-            showLoveflix();
-        }
-
-        function resetStory() { localStorage.removeItem('hasSeenIntro'); location.reload(); }
-
-        function playStory() {
-            story.style.display = 'flex';
-            bubble.innerText = "Just solving this Codeforces problem..."; 
+        function playIntro() {
+            const avatar = document.getElementById('avatar');
+            const bubble = document.getElementById('thought-bubble');
+            const terminal = document.getElementById('terminal');
             
-            setTimeout(() => { avatar.innerText = "😱"; bubble.innerText = "WAIT! It's Valentine's Week?!"; }, 3000);
-            setTimeout(() => { avatar.innerText = "🏃‍♂️"; bubble.innerText = "I need to fix this NOW!"; }, 5500);
-            setTimeout(() => { avatar.innerText = "👨‍💻"; bubble.style.display = 'none'; terminal.style.display = 'block'; typeCode(); }, 8000);
+            setTimeout(() => { avatar.innerText = "😱"; bubble.innerText = "WAIT! It's Valentine's Week?!"; }, 2500);
+            setTimeout(() => { avatar.innerText = "👨‍💻"; bubble.style.display = 'none'; terminal.style.display = 'block'; typeCode(); }, 5000);
         }
 
         function typeCode() {
-            const lines = ["> init project love_for_nirjhora", "> import heart", "> while(alive) { love++ }", "> git commit -m 'Promise Day Fix'", "> deploying to Loveflix..."];
-            let idx = 0;
+            const lines = ["> git init love", "> import heart", "> while(alive) { love++ }", "> deploying Loveflix..."];
+            let i = 0;
             let itv = setInterval(() => {
-                if (idx < lines.length) { terminal.innerHTML += lines[idx] + "<br>"; idx++; }
-                else { clearInterval(itv); loader.style.width = "100%"; setTimeout(showLoveflix, 2000); }
-            }, 800);
+                if(i < lines.length) { document.getElementById('terminal').innerHTML += lines[i] + "<br>"; i++; }
+                else { clearInterval(itv); document.getElementById('loader').style.width = "100%"; setTimeout(showLoveflix, 1500); }
+            }, 700);
         }
 
         function showLoveflix() {
-            localStorage.setItem('hasSeenIntro', 'true');
-            story.style.display = 'none';
-            loveflix.style.display = 'block';
+            localStorage.setItem('seenIntro', 'true');
+            document.getElementById('story-container').style.display = 'none';
+            document.getElementById('loveflix-container').style.display = 'block';
             renderEpisodes();
         }
 
         function renderEpisodes() {
             const list = document.getElementById('episode-list');
-            list.innerHTML = "";
             episodes.forEach(ep => {
-                const isLocked = currentDay < ep.day;
                 const card = document.createElement('div');
-                card.className = `ep-card ${isLocked ? 'locked' : ''}`;
-                card.innerHTML = `
-                    <div class="ep-thumb" style="background:${isLocked ? '#333' : '#444'}">
-                        ${isLocked ? '<span class="lock-icon">🔒</span>' : ep.icon}
-                    </div>
-                    <div class="ep-info">
-                        <div class="ep-title">${ep.title}</div>
-                        <div class="ep-desc">${isLocked ? 'Releases Feb ' + ep.day : 'Available Now'}</div>
-                    </div>
-                `;
-                if (!isLocked) card.onclick = () => openModal(ep);
+                card.className = `ep-card ${currentDay < ep.day ? 'locked' : ''}`;
+                card.innerHTML = `<div class="ep-thumb">${ep.icon}</div><div class="ep-info"><div class="ep-title">${ep.title}</div></div>`;
+                card.onclick = () => openPlayer(ep);
                 list.appendChild(card);
             });
         }
 
-        function playCurrentDay() {
-            const ep = episodes.find(e => e.day === currentDay);
-            if (ep) openModal(ep); else openModal(episodes[0]);
-        }
-
-        function openModal(ep) {
-            document.getElementById('modal').style.display = 'flex';
+        // --- PLAYER & ANIMATION ENGINE ---
+        function openPlayer(ep) {
+            const modal = document.getElementById('modal');
+            const zone = document.getElementById('custom-animation-zone');
+            modal.style.display = 'flex';
             document.getElementById('m-title').innerText = ep.title;
             document.getElementById('m-text').innerText = ep.msg;
+            zone.innerHTML = "";
+
+            if (ep.type === "shower") {
+                for(let i=0; i<30; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    p.innerText = ep.emoji;
+                    p.style.left = Math.random() * 100 + 'vw';
+                    p.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                    p.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    p.style.top = '-50px';
+                    modal.appendChild(p);
+                }
+            } else if (ep.type === "hug") {
+                zone.innerHTML = `
+                    <div class="hand-container" style="opacity:1">
+                        <div class="hand-anim">🤝</div>
+                    </div>
+                    <p style="color:#00ffcc; font-family:monospace;">[ STATUS: PROMISE_SYNC_100% ]</p>
+                `;
+            }
         }
 
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function playToday() {
+            const ep = episodes.find(e => e.day === currentDay);
+            if (ep) openPlayer(ep);
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.querySelectorAll('.particle').forEach(p => p.remove());
+        }
     </script>
 </body>
 </html>
