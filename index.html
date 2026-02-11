@@ -3,155 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sync: Rakib & Nirjhora</title>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <title>Code & Love</title>
     <style>
-        :root {
-            --cyan: #00f3ff;
-            --pink: #ff0055;
-        }
-
         body {
             margin: 0;
-            background-color: #030303;
-            overflow: hidden;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Center the whole group */
-            align-items: center;
-            height: 100vh;
-            color: white;
-            text-align: center;
-        }
-
-        /* --- STACKED LAYOUT --- */
-        #main-wrapper {
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px; /* Controls gap between all elements */
-        }
-
-        #lottie-container {
-            width: 180px;
-            height: 180px;
-        }
-
-        #name-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.8s ease-out;
-        }
-
-        #name-container.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .name {
-            font-size: 2rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .rakib { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
-        .nirjhora { color: var(--pink); text-shadow: 0 0 15px var(--pink); }
-        .heart { font-size: 1.5rem; text-shadow: 0 0 15px #fff; }
-
-        /* --- UI OVERLAY (Now right after names) --- */
-        #ui-overlay {
-            width: 100%;
-            opacity: 0;
-            transition: all 0.8s ease-out 0.5s; /* Slight delay after names */
-        }
-
-        #ui-overlay.active { opacity: 1; }
-
-        .status {
-            color: #00ffcc;
+            padding: 0;
             font-family: 'Courier New', monospace;
-            font-size: 0.65rem;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
         }
 
-        .promise {
-            font-size: 0.9rem;
-            color: #bbb;
-            max-width: 280px;
-            line-height: 1.4;
+        /* --- STORY MODE STYLES --- */
+        #story-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            max-width: 80%;
         }
 
-        .cyan-text { color: var(--cyan); font-weight: bold; }
-        .pink-text { color: var(--pink); font-weight: bold; }
+        .avatar { font-size: 80px; margin-bottom: 20px; transition: all 0.5s; }
+        .bubble {
+            background: white;
+            color: black;
+            padding: 15px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            position: relative;
+            margin-bottom: 20px;
+            opacity: 1; 
+            transform: translateY(0);
+            transition: all 0.5s;
+        }
+        /* Chat bubble tail */
+        .bubble::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            border-width: 10px 10px 0; border-style: solid;
+            border-color: white transparent; display: block; width: 0;
+        }
 
-        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+        .code-screen {
+            background: #2d2d2d;
+            border: 2px solid #555;
+            padding: 10px;
+            width: 300px;
+            height: 150px;
+            text-align: left;
+            font-size: 0.8rem;
+            color: #00ff00;
+            display: none;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        /* --- ACTUAL DAY STYLES --- */
+        #daily-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background 1s;
+        }
+
+        /* Day Themes */
+        .bg-rose { background: #ff7675; color: white; }
+        .bg-propose { background: #74b9ff; color: white; }
+        .bg-chocolate { background: #6c5ce7; color: white; }
+        .bg-teddy { background: #fab1a0; color: white; }
+        .bg-promise { background: #0984e3; color: white; }
+        .bg-hug { background: #fd79a8; color: white; }
+        .bg-kiss { background: #e84393; color: white; }
+        .bg-valentine { background: #d63031; color: white; }
+
+        .big-icon { font-size: 100px; animation: heartbeat 1.5s infinite; }
+        h1 { font-size: 2.5rem; margin: 10px; }
+        p { font-size: 1.2rem; max-width: 80%; }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            width: 0%; height: 5px; background: #00ff00; margin-top: 10px; transition: width 2s;
+        }
+
+        /* --- REPLAY BUTTON --- */
+        #replay-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            display: none; /* Hidden during story */
+            transition: background 0.3s;
+            z-index: 100;
+        }
+        #replay-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas"></canvas>
+    <button id="replay-btn" onclick="resetStory()">↺ Replay Story</button>
 
-    <div id="main-wrapper">
-        <div id="lottie-container">
-            <lottie-player 
-                src="https://lottie.host/80789714-3580-4966-9e63-c7150075586b/tT6F2l5A8L.json" 
-                background="transparent" 
-                speed="1.2" 
-                style="width: 100%; height: 100%;" 
-                loop 
-                autoplay>
-            </lottie-player>
-        </div>
+    <div id="story-container">
+        <div class="bubble" id="thought-bubble">Initializing...</div>
+        <div class="avatar" id="avatar">🧑‍💻</div>
+        <div class="code-screen" id="terminal"></div>
+        <div class="progress-bar" id="loader"></div>
+    </div>
 
-        <div id="name-container">
-            <span class="name rakib">Rakib</span>
-            <span class="heart">❤️</span>
-            <span class="name nirjhora">Nirjhora</span>
-        </div>
-
-        <div id="ui-overlay">
-            <div class="status">>> ENCRYPTION_SYNC_COMPLETE</div>
-            <div class="promise">
-                I promise to <span class="cyan-text">debug your code</span> and buy snacks from the <span class="pink-text">EWU Cafeteria</span>.
-            </div>
-        </div>
+    <div id="daily-content">
+        <div class="big-icon" id="day-icon"></div>
+        <h1 id="day-title"></h1>
+        <p id="day-msg"></p>
     </div>
 
     <script>
-        window.onload = () => {
-            // Trigger animations in sequence
-            setTimeout(() => {
-                document.getElementById('name-container').classList.add('active');
-                document.getElementById('ui-overlay').classList.add('active');
-            }, 800);
+        // --- CONFIGURATION ---
+        const days = {
+            7:  { theme: "bg-rose", icon: "🌹", title: "Happy Rose Day!", msg: "Start of something beautiful." },
+            8:  { theme: "bg-propose", icon: "💍", title: "Happy Propose Day!", msg: "You are my bug-free code." },
+            9:  { theme: "bg-chocolate", icon: "🍫", title: "Happy Chocolate Day!", msg: "You're sweeter than success." },
+            10: { theme: "bg-teddy", icon: "🧸", title: "Happy Teddy Day!", msg: "Sending you a virtual hug." },
+            11: { theme: "bg-promise", icon: "🤞", title: "Happy Promise Day!", msg: "I promise to debug all your problems." },
+            12: { theme: "bg-hug", icon: "🤗", title: "Happy Hug Day!", msg: "Loading Hug... 100% Complete." },
+            13: { theme: "bg-kiss", icon: "💋", title: "Happy Kiss Day!", msg: "Compiling kisses for you..." },
+            14: { theme: "bg-valentine", icon: "❤️", title: "Happy Valentine's Day!", msg: "My Player 2 Forever." }
         };
 
-        // Simple starfield background
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        
-        function init() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+        const today = new Date();
+        const currentDay = today.getDate(); 
+        // const currentDay = 11; // UNCOMMENT TO TEST
+
+        // --- DOM ELEMENTS ---
+        const storyContainer = document.getElementById('story-container');
+        const dailyContainer = document.getElementById('daily-content');
+        const avatar = document.getElementById('avatar');
+        const bubble = document.getElementById('thought-bubble');
+        const terminal = document.getElementById('terminal');
+        const loader = document.getElementById('loader');
+        const replayBtn = document.getElementById('replay-btn');
+
+        // --- CHECK HISTORY ---
+        const hasVisited = localStorage.getItem('hasVisitedValentine');
+
+        if (!hasVisited) {
+            playStory();
+        } else {
+            showDailyContent();
         }
 
-        function animate() {
-            ctx.fillStyle = '#030303';
-            ctx.fillRect(0, 0, width, height);
-            requestAnimationFrame(animate);
+        // --- RESET FUNCTION ---
+        function resetStory() {
+            localStorage.removeItem('hasVisitedValentine');
+            location.reload();
         }
 
-        window.onresize = init;
-        init();
-        animate();
+        // --- SCENE 1: THE STORY ---
+        function playStory() {
+            storyContainer.style.display = 'flex';
+            dailyContainer.style.display = 'none';
+            replayBtn.style.display = 'none';
+            
+            // Step 1: Working hard
+            bubble.innerText = "Just solving this Codeforces problem..."; // Customized for Rakibul
+            
+            // Step 2: Realization (3 seconds later)
+            setTimeout(() => {
+                avatar.innerText = "😱"; 
+                bubble.innerText = "WAIT! It's Valentine's Week?!";
+            }, 3000);
+
+            // Step 3: Action (6 seconds later)
+            setTimeout(() => {
+                avatar.innerText = "🏃‍♂️"; 
+                bubble.innerText = "I need to fix this NOW!";
+            }, 6000);
+
+            // Step 4: Coding (8 seconds later)
+            setTimeout(() => {
+                avatar.innerText = "👨‍💻"; 
+                bubble.style.display = 'none'; 
+                terminal.style.display = 'block'; 
+                typeCode();
+            }, 8000);
+        }
+
+        function typeCode() {
+            const codeLines = [
+                "> init project love_for_her",
+                "> import heart",
+                "> while(alive) { love++ }",
+                "> git commit -m 'For Her'",
+                "> deploy to production..."
+            ];
+            let lineIndex = 0;
+            terminal.innerHTML = ""; // Clear previous text
+            
+            let typeInterval = setInterval(() => {
+                if (lineIndex < codeLines.length) {
+                    terminal.innerHTML += codeLines[lineIndex] + "<br>";
+                    lineIndex++;
+                } else {
+                    clearInterval(typeInterval);
+                    loader.style.width = "100%";
+                    setTimeout(() => {
+                        localStorage.setItem('hasVisitedValentine', 'true');
+                        storyContainer.style.display = 'none';
+                        showDailyContent();
+                    }, 2000);
+                }
+            }, 800); 
+        }
+
+        // --- SCENE 2: THE DAILY REVEAL ---
+        function showDailyContent() {
+            dailyContainer.style.display = 'flex';
+            replayBtn.style.display = 'block'; // Show replay button
+            
+            let data = days[currentDay];
+            
+            if (data) {
+                document.body.className = data.theme;
+                // We use dailyContainer background too to ensure coverage
+                dailyContainer.className = data.theme; 
+                document.getElementById('day-icon').innerText = data.icon;
+                document.getElementById('day-title').innerText = data.title;
+                document.getElementById('day-msg').innerText = data.msg;
+            } else {
+                // Fallback
+                document.body.style.background = "#2d3436";
+                document.getElementById('day-icon').innerText = "💖";
+                document.getElementById('day-title').innerText = "Love You!";
+                document.getElementById('day-msg').innerText = "Every day is your day.";
+            }
+        }
     </script>
 </body>
 </html>
