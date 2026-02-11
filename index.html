@@ -5,83 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sync: Rakib & Nirjhora</title>
     <style>
-        body {
-            margin: 0;
-            background-color: #030303;
-            overflow: hidden;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        canvas {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        #ui-container {
-            position: absolute;
-            bottom: 12%; 
-            width: 100%;
-            text-align: center;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .status {
-            color: #00ffcc;
-            font-size: 0.7rem;
-            letter-spacing: 3px;
-            opacity: 0;
-            animation: fadeIn 0.5s ease forwards 4s;
-        }
-
-        .promise {
-            font-size: 0.95rem;
-            color: #aaa;
-            font-family: 'Segoe UI', sans-serif;
-            margin-top: 8px;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards 5s;
-        }
-
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        #ui { position: absolute; bottom: 15%; width: 100%; text-align: center; z-index: 10; pointer-events: none; }
+        .status { color: #00ffcc; font-size: 0.7rem; letter-spacing: 2px; opacity: 0; animation: fadeIn 0.5s forwards 4s; }
+        .promise { font-size: 0.9rem; color: #888; margin-top: 10px; opacity: 0; animation: fadeIn 1s forwards 5s; }
         .cyan { color: #00f3ff; font-weight: bold; }
         .pink { color: #ff0055; font-weight: bold; }
-
         @keyframes fadeIn { to { opacity: 1; } }
     </style>
 </head>
 <body>
-
     <canvas id="canvas"></canvas>
-
-    <div id="ui-container">
-        <div class="status">>> CONNECTION_SECURE: 200 OK</div>
+    <div id="ui">
+        <div class="status">>> LINK_ESTABLISHED: 200_OK</div>
         <div class="promise">
-            I promise to <span class="cyan">debug your code</span> 
-            and buy snacks from the <span class="pink">EWU Cafeteria</span>.
+            I promise to <span class="cyan">debug your code</span> and buy snacks from the <span class="pink">EWU Cafeteria</span>.
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        
-        let width, height, particles = [];
-        let linkProgress = 0;
-        const dpr = window.devicePixelRatio || 1; // Fix for High-Res Mobile
-
-        // --- CUSTOMIZATION ---
-        const NAME_1 = "Rakib";
-        const NAME_2 = "Nirjhora";
-        const HEART = "❤️";
-        const DENSITY = 3.5; // Lower = Higher Detail
+        let particles = [], width, height, linkProgress = 0;
+        const dpr = window.devicePixelRatio || 2; // High-res fix
 
         function init() {
             width = window.innerWidth;
@@ -89,120 +36,83 @@
             canvas.width = width * dpr;
             canvas.height = height * dpr;
             ctx.scale(dpr, dpr);
-            
-            createBlueprint();
+            createParticles();
         }
 
-        function createBlueprint() {
+        function createParticles() {
             particles = [];
             const offCanvas = document.createElement('canvas');
             const offCtx = offCanvas.getContext('2d');
             offCanvas.width = width;
             offCanvas.height = height;
 
+            // Use a very heavy font for better particle density
             const fontSize = Math.min(width, height) / 8;
-            offCtx.font = `900 ${fontSize}px Arial, sans-serif`;
+            offCtx.font = `900 ${fontSize}px Arial Black, sans-serif`;
             offCtx.textAlign = 'center';
             offCtx.textBaseline = 'middle';
             
-            // Draw the text blueprint
-            const text = `${NAME_1} ${HEART} ${NAME_2}`;
+            const text = "Rakib ❤️ Nirjhora";
             offCtx.fillText(text, width / 2, height / 2 - 30);
 
             const pixels = offCtx.getImageData(0, 0, width, height).data;
+            const density = 2.5; // Tighter grid for mobile clarity
 
-            for (let y = 0; y < height; y += DENSITY) {
-                for (let x = 0; x < width; x += DENSITY) {
-                    const alpha = pixels[(y * width + x) * 4 + 3];
-                    if (alpha > 128) {
-                        
-                        // Color logic based on text section
+            for (let y = 0; y < height; y += density) {
+                for (let x = 0; x < width; x += density) {
+                    if (pixels[(y * width + x) * 4 + 3] > 128) {
                         let color;
-                        const relativeX = x / width;
-                        if (relativeX < 0.42) color = '#00f3ff';      // Rakib
-                        else if (relativeX > 0.58) color = '#ff0055'; // Nirjhora
-                        else color = '#ffffff';                       // Heart
-
-                        // Start points (Flying in from male/female side ports)
-                        let startX = (relativeX < 0.5) ? -50 : width + 50;
-                        let startY = height / 2 - 30;
+                        const relX = x / width;
+                        if (relX < 0.42) color = '#00f3ff';      // Rakib
+                        else if (relX > 0.58) color = '#ff0055'; // Nirjhora
+                        else color = '#ffffff';                 // Heart
 
                         particles.push({
-                            x: startX, y: startY,
+                            x: (relX < 0.5) ? -50 : width + 50,
+                            y: height / 2 - 30,
                             tx: x, ty: y,
                             color: color,
                             size: Math.random() * 1.5 + 0.5,
-                            friction: Math.random() * 0.05 + 0.04,
-                            delay: Math.random() * 60
+                            ease: Math.random() * 0.06 + 0.04
                         });
                     }
                 }
             }
         }
 
-        function drawCircuitLink() {
+        function drawLines() {
             const cy = height / 2 - 30;
-            const stopPoint = 15;
-            
-            // Left Trace (Male Header)
-            ctx.strokeStyle = '#00f3ff';
+            const p = Math.min(linkProgress * 2, 1);
             ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, cy);
-            ctx.lineTo((width/2 - stopPoint) * Math.min(linkProgress * 2, 1), cy);
-            ctx.stroke();
-
-            // Right Trace (Female Header)
+            ctx.strokeStyle = '#00f3ff';
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo((width/2 - 10) * p, cy); ctx.stroke();
             ctx.strokeStyle = '#ff0055';
-            ctx.beginPath();
-            ctx.moveTo(width, cy);
-            ctx.lineTo(width - (width/2 - stopPoint) * Math.min(linkProgress * 2, 1), cy);
-            ctx.stroke();
-
-            // Spark on Contact
+            ctx.beginPath(); ctx.moveTo(width, cy); ctx.lineTo(width - (width/2 - 10) * p, cy); ctx.stroke();
             if (linkProgress > 0.5) {
-                const sparkSize = (linkProgress - 0.5) * 40;
                 ctx.fillStyle = '#fff';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#fff';
-                ctx.beginPath();
-                ctx.arc(width/2, cy, Math.random() * 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.arc(width/2, cy, (linkProgress-0.5)*15, 0, Math.PI*2); ctx.fill();
             }
         }
 
         function animate() {
-            ctx.fillStyle = 'rgba(3, 3, 3, 0.25)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
             ctx.fillRect(0, 0, width, height);
-
             if (linkProgress < 1) {
                 linkProgress += 0.008;
-                drawCircuitLink();
+                drawLines();
             } else {
-                // Convergence Phase
                 particles.forEach(p => {
-                    if (p.delay > 0) {
-                        p.delay--;
-                    } else {
-                        // Advanced easing for crisp formation
-                        p.x += (p.tx - p.x) * p.friction;
-                        p.y += (p.ty - p.y) * p.friction;
-                    }
-
+                    p.x += (p.tx - p.x) * p.ease;
+                    p.y += (p.ty - p.y) * p.ease;
                     ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
                 });
             }
-
             requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', () => location.reload());
-        init();
-        animate();
+        init(); animate();
     </script>
 </body>
 </html>
