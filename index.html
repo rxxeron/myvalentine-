@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Established | Rakib & Nirjhora</title>
+    <title>Sync: Rakib & Nirjhora</title>
     <style>
         :root {
             --cyan: #00f3ff;
@@ -12,12 +12,11 @@
 
         body {
             margin: 0;
-            background-color: #050505;
+            background-color: #030303;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             height: 100vh;
         }
@@ -30,14 +29,16 @@
             z-index: 1;
         }
 
-        /* --- TEXT CONTAINER --- */
+        /* --- NAME SECTION (Moved Up) --- */
         #name-container {
+            position: absolute;
+            top: 40%; /* Adjusted Upward */
             z-index: 10;
             display: flex;
             align-items: center;
             gap: 15px;
             opacity: 0;
-            transform: scale(0.8);
+            transform: scale(0.85);
             transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -47,20 +48,20 @@
         }
 
         .name {
-            font-size: 3rem;
+            font-size: 2.2rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: -1px;
+            letter-spacing: 2px;
         }
 
-        .rakib { color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
-        .nirjhora { color: var(--pink); text-shadow: 0 0 20px var(--pink); }
-        .heart { color: #fff; font-size: 2.5rem; text-shadow: 0 0 20px #fff; }
+        .rakib { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
+        .nirjhora { color: var(--pink); text-shadow: 0 0 15px var(--pink); }
+        .heart { color: #fff; font-size: 1.8rem; text-shadow: 0 0 20px #fff; }
 
-        /* --- UI OVERLAY --- */
+        /* --- UI OVERLAY (Gap Created) --- */
         #ui-overlay {
             position: absolute;
-            bottom: 10%;
+            bottom: 15%; /* Positioned lower for clear gap */
             text-align: center;
             z-index: 10;
             width: 100%;
@@ -70,18 +71,18 @@
         .status {
             color: #00ffcc;
             font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             letter-spacing: 3px;
             opacity: 0;
+            margin-bottom: 12px;
         }
 
         .promise {
-            font-size: 1rem;
-            color: #888;
-            margin-top: 10px;
-            max-width: 80%;
-            margin-left: auto;
-            margin-right: auto;
+            font-size: 0.9rem;
+            color: #aaa;
+            max-width: 85%;
+            margin: 0 auto;
+            line-height: 1.6;
             opacity: 0;
         }
 
@@ -89,10 +90,10 @@
 
         @keyframes fadeIn { to { opacity: 1; } }
 
-        /* Mobile specific font sizing */
         @media (max-width: 600px) {
-            .name { font-size: 1.8rem; }
-            .heart { font-size: 1.5rem; }
+            .name { font-size: 1.6rem; }
+            #name-container { top: 38%; }
+            #ui-overlay { bottom: 12%; }
         }
     </style>
 </head>
@@ -124,18 +125,17 @@
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
             particles = [];
-            for(let i=0; i<60; i++) particles.push(new Particle());
+            // Energy background particles
+            for(let i=0; i<50; i++) particles.push(new Particle());
         }
 
         class Particle {
-            constructor() {
-                this.reset();
-            }
+            constructor() { this.reset(); }
             reset() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 1;
-                this.vy = (Math.random() - 0.5) * 1;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
                 this.size = Math.random() * 2;
                 this.alpha = Math.random();
                 this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff0055';
@@ -155,14 +155,15 @@
         }
 
         function drawCircuitTraces() {
-            const centerY = height / 2;
+            // Target the Y position of the names for the connection point
+            const centerY = height * 0.40; 
             const progress = Math.min(linkProgress * 1.5, 1);
             
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3;
             ctx.lineCap = 'round';
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
 
-            // Left Trace (Cyan)
+            // Cyan Trace (Left)
             ctx.strokeStyle = '#00f3ff';
             ctx.shadowColor = '#00f3ff';
             ctx.beginPath();
@@ -170,7 +171,7 @@
             ctx.lineTo((width/2 - 20) * progress, centerY);
             ctx.stroke();
 
-            // Right Trace (Pink)
+            // Pink Trace (Right)
             ctx.strokeStyle = '#ff0055';
             ctx.shadowColor = '#ff0055';
             ctx.beginPath();
@@ -178,19 +179,19 @@
             ctx.lineTo(width - (width/2 - 20) * progress, centerY);
             ctx.stroke();
 
-            // The Connection Point
+            // Central Spark
             if (linkProgress > 0.65) {
                 ctx.fillStyle = '#fff';
                 ctx.shadowColor = '#fff';
                 ctx.beginPath();
-                ctx.arc(width/2, centerY, (linkProgress - 0.65) * 50, 0, Math.PI * 2);
+                ctx.arc(width/2, centerY, (linkProgress - 0.65) * 60, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
         function animate() {
             ctx.globalAlpha = 1;
-            ctx.fillStyle = '#050505';
+            ctx.fillStyle = '#030303';
             ctx.fillRect(0, 0, width, height);
 
             if (!isConnected) {
@@ -199,19 +200,15 @@
                 if (linkProgress >= 1) {
                     isConnected = true;
                     document.getElementById('name-container').classList.add('active');
-                    document.getElementById('status-tag').classList.add('active-text');
-                    document.getElementById('promise-tag').classList.add('active-text');
+                    setTimeout(() => {
+                        document.getElementById('status-tag').classList.add('active-text');
+                        document.getElementById('promise-tag').classList.add('active-text');
+                    }, 500);
                 }
             } else {
-                // Background Particle Energy
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
-                // Small Sparkles around names
+                particles.forEach(p => { p.update(); p.draw(); });
                 ctx.shadowBlur = 0;
             }
-
             requestAnimationFrame(animate);
         }
 
