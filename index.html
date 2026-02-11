@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sync: Rakib & Nirjhora</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         :root {
             --cyan: #00f3ff;
@@ -17,202 +18,138 @@
             font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
+            justify-content: center; /* Center the whole group */
             align-items: center;
             height: 100vh;
+            color: white;
+            text-align: center;
         }
 
-        canvas {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        /* --- NAME SECTION (Moved Up) --- */
-        #name-container {
-            position: absolute;
-            top: 40%; /* Adjusted Upward */
+        /* --- STACKED LAYOUT --- */
+        #main-wrapper {
             z-index: 10;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 10px; /* Controls gap between all elements */
+        }
+
+        #lottie-container {
+            width: 180px;
+            height: 180px;
+        }
+
+        #name-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             opacity: 0;
-            transform: scale(0.85);
-            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(10px);
+            transition: all 0.8s ease-out;
         }
 
         #name-container.active {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0);
         }
 
         .name {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         .rakib { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
         .nirjhora { color: var(--pink); text-shadow: 0 0 15px var(--pink); }
-        .heart { color: #fff; font-size: 1.8rem; text-shadow: 0 0 20px #fff; }
+        .heart { font-size: 1.5rem; text-shadow: 0 0 15px #fff; }
 
-        /* --- UI OVERLAY (Gap Created) --- */
+        /* --- UI OVERLAY (Now right after names) --- */
         #ui-overlay {
-            position: absolute;
-            bottom: 15%; /* Positioned lower for clear gap */
-            text-align: center;
-            z-index: 10;
             width: 100%;
-            pointer-events: none;
+            opacity: 0;
+            transition: all 0.8s ease-out 0.5s; /* Slight delay after names */
         }
+
+        #ui-overlay.active { opacity: 1; }
 
         .status {
             color: #00ffcc;
             font-family: 'Courier New', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 3px;
-            opacity: 0;
-            margin-bottom: 12px;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
         }
 
         .promise {
             font-size: 0.9rem;
-            color: #aaa;
-            max-width: 85%;
-            margin: 0 auto;
-            line-height: 1.6;
-            opacity: 0;
+            color: #bbb;
+            max-width: 280px;
+            line-height: 1.4;
         }
 
-        .active-text { animation: fadeIn 1s forwards; }
+        .cyan-text { color: var(--cyan); font-weight: bold; }
+        .pink-text { color: var(--pink); font-weight: bold; }
 
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        @media (max-width: 600px) {
-            .name { font-size: 1.6rem; }
-            #name-container { top: 38%; }
-            #ui-overlay { bottom: 12%; }
-        }
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
     </style>
 </head>
 <body>
 
     <canvas id="canvas"></canvas>
 
-    <div id="name-container">
-        <span class="name rakib">Rakib</span>
-        <span class="heart">❤️</span>
-        <span class="name nirjhora">Nirjhora</span>
-    </div>
+    <div id="main-wrapper">
+        <div id="lottie-container">
+            <lottie-player 
+                src="https://lottie.host/80789714-3580-4966-9e63-c7150075586b/tT6F2l5A8L.json" 
+                background="transparent" 
+                speed="1.2" 
+                style="width: 100%; height: 100%;" 
+                loop 
+                autoplay>
+            </lottie-player>
+        </div>
 
-    <div id="ui-overlay">
-        <div id="status-tag" class="status">>> LINK_ENCRYPTED_256_BIT</div>
-        <div id="promise-tag" class="promise">
-            I promise to <b>debug your code</b> and buy snacks from the <b>EWU Cafeteria</b>.
+        <div id="name-container">
+            <span class="name rakib">Rakib</span>
+            <span class="heart">❤️</span>
+            <span class="name nirjhora">Nirjhora</span>
+        </div>
+
+        <div id="ui-overlay">
+            <div class="status">>> ENCRYPTION_SYNC_COMPLETE</div>
+            <div class="promise">
+                I promise to <span class="cyan-text">debug your code</span> and buy snacks from the <span class="pink-text">EWU Cafeteria</span>.
+            </div>
         </div>
     </div>
 
     <script>
+        window.onload = () => {
+            // Trigger animations in sequence
+            setTimeout(() => {
+                document.getElementById('name-container').classList.add('active');
+                document.getElementById('ui-overlay').classList.add('active');
+            }, 800);
+        };
+
+        // Simple starfield background
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        let width, height, particles = [];
-        let linkProgress = 0;
-        let isConnected = false;
-
+        let width, height;
+        
         function init() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            particles = [];
-            // Energy background particles
-            for(let i=0; i<50; i++) particles.push(new Particle());
-        }
-
-        class Particle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-                this.size = Math.random() * 2;
-                this.alpha = Math.random();
-                this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff0055';
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if(this.x < 0 || this.x > width || this.y < 0 || this.y > height) this.reset();
-            }
-            draw() {
-                ctx.globalAlpha = this.alpha;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-                ctx.fill();
-            }
-        }
-
-        function drawCircuitTraces() {
-            // Target the Y position of the names for the connection point
-            const centerY = height * 0.40; 
-            const progress = Math.min(linkProgress * 1.5, 1);
-            
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            ctx.shadowBlur = 20;
-
-            // Cyan Trace (Left)
-            ctx.strokeStyle = '#00f3ff';
-            ctx.shadowColor = '#00f3ff';
-            ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo((width/2 - 20) * progress, centerY);
-            ctx.stroke();
-
-            // Pink Trace (Right)
-            ctx.strokeStyle = '#ff0055';
-            ctx.shadowColor = '#ff0055';
-            ctx.beginPath();
-            ctx.moveTo(width, centerY);
-            ctx.lineTo(width - (width/2 - 20) * progress, centerY);
-            ctx.stroke();
-
-            // Central Spark
-            if (linkProgress > 0.65) {
-                ctx.fillStyle = '#fff';
-                ctx.shadowColor = '#fff';
-                ctx.beginPath();
-                ctx.arc(width/2, centerY, (linkProgress - 0.65) * 60, 0, Math.PI * 2);
-                ctx.fill();
-            }
         }
 
         function animate() {
-            ctx.globalAlpha = 1;
             ctx.fillStyle = '#030303';
             ctx.fillRect(0, 0, width, height);
-
-            if (!isConnected) {
-                linkProgress += 0.01;
-                drawCircuitTraces();
-                if (linkProgress >= 1) {
-                    isConnected = true;
-                    document.getElementById('name-container').classList.add('active');
-                    setTimeout(() => {
-                        document.getElementById('status-tag').classList.add('active-text');
-                        document.getElementById('promise-tag').classList.add('active-text');
-                    }, 500);
-                }
-            } else {
-                particles.forEach(p => { p.update(); p.draw(); });
-                ctx.shadowBlur = 0;
-            }
             requestAnimationFrame(animate);
         }
 
-        window.addEventListener('resize', init);
+        window.onresize = init;
         init();
         animate();
     </script>
