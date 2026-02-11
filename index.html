@@ -3,259 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code & Love</title>
+    <title>Loveflix</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Courier New', monospace;
-            background-color: #1e1e1e;
-            color: #ffffff;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        /* --- STORY MODE STYLES --- */
-        #story-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            max-width: 80%;
-        }
-
-        .avatar { font-size: 80px; margin-bottom: 20px; transition: all 0.5s; }
-        .bubble {
-            background: white;
-            color: black;
-            padding: 15px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-            position: relative;
-            margin-bottom: 20px;
-            opacity: 1; 
-            transform: translateY(0);
-            transition: all 0.5s;
-        }
-        /* Chat bubble tail */
-        .bubble::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%;
-            border-width: 10px 10px 0; border-style: solid;
-            border-color: white transparent; display: block; width: 0;
-        }
-
-        .code-screen {
-            background: #2d2d2d;
-            border: 2px solid #555;
-            padding: 10px;
-            width: 300px;
-            height: 150px;
-            text-align: left;
-            font-size: 0.8rem;
-            color: #00ff00;
-            display: none;
-            overflow: hidden;
-            border-radius: 5px;
-        }
-
-        /* --- ACTUAL DAY STYLES --- */
-        #daily-content {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: background 1s;
-        }
-
-        /* Day Themes */
-        .bg-rose { background: #ff7675; color: white; }
-        .bg-propose { background: #74b9ff; color: white; }
-        .bg-chocolate { background: #6c5ce7; color: white; }
-        .bg-teddy { background: #fab1a0; color: white; }
-        .bg-promise { background: #0984e3; color: white; }
-        .bg-hug { background: #fd79a8; color: white; }
-        .bg-kiss { background: #e84393; color: white; }
-        .bg-valentine { background: #d63031; color: white; }
-
-        .big-icon { font-size: 100px; animation: heartbeat 1.5s infinite; }
-        h1 { font-size: 2.5rem; margin: 10px; }
-        p { font-size: 1.2rem; max-width: 80%; }
-        
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Progress Bar */
-        .progress-bar {
-            width: 0%; height: 5px; background: #00ff00; margin-top: 10px; transition: width 2s;
-        }
-
-        /* --- REPLAY BUTTON --- */
-        #replay-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid white;
+            background-color: #141414; /* Netflix Black */
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: inherit;
-            display: none; /* Hidden during story */
-            transition: background 0.3s;
-            z-index: 100;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
         }
-        #replay-btn:hover {
-            background: rgba(255, 255, 255, 0.5);
+        
+        /* HEADER / HERO SECTION */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(to top, #141414, transparent), 
+                        url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #E50914; /* Netflix Red */
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .meta {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #46d369; /* Match Rating Green */
+            font-weight: bold;
+        }
+
+        .description {
+            width: 50%;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 5px black;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .btn-play { background: white; color: black; }
+        .btn-info { background: rgba(109, 109, 110, 0.7); color: white; }
+
+        /* EPISODES SLIDER */
+        .episodes-title { padding-left: 40px; margin-top: 20px; font-size: 1.5rem; }
+        
+        .row {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px 40px;
+            gap: 15px;
+        }
+
+        .card {
+            min-width: 250px;
+            height: 140px;
+            background: #333;
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .card:hover { transform: scale(1.1); z-index: 10; border: 2px solid white;}
+
+        /* LOCKED STATE */
+        .locked { filter: grayscale(100%); opacity: 0.5; pointer-events: none; }
+        .locked::after { content: '🔒'; font-size: 2rem; position: absolute; }
+
+        .card h3 { margin: 0; padding: 10px; z-index: 2; position: relative;}
+        
+        /* POPUP MODAL */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        #modal-content { font-size: 2rem; color: white; animation: pop 0.5s; padding: 20px;}
+        .close-btn { 
+            position: absolute; top: 30px; right: 40px; 
+            font-size: 3rem; color: white; cursor: pointer; 
+        }
+
+        /* ANIMATIONS */
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        
+        /* Mobile Tweaks */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .description { width: 100%; }
+            .hero { height: 60vh; }
         }
     </style>
 </head>
 <body>
 
-    <button id="replay-btn" onclick="resetStory()">↺ Replay Story</button>
-
-    <div id="story-container">
-        <div class="bubble" id="thought-bubble">Initializing...</div>
-        <div class="avatar" id="avatar">🧑‍💻</div>
-        <div class="code-screen" id="terminal"></div>
-        <div class="progress-bar" id="loader"></div>
+    <div class="hero">
+        <h1>OUR STORY</h1>
+        <div class="meta">98% Match &nbsp; 2 Seasons &nbsp; Romantic Comedy</div>
+        <p class="description">
+            A brilliant engineer meets the girl of his dreams. Watch as they debug life together, one day at a time.
+            <br><strong>Trending now for Valentine's Week.</strong>
+        </p>
+        <div>
+            <button class="btn btn-play" onclick="playToday()">▶ Play Today's Episode</button>
+            <button class="btn btn-info">ℹ More Info</button>
+        </div>
     </div>
 
-    <div id="daily-content">
-        <div class="big-icon" id="day-icon"></div>
-        <h1 id="day-title"></h1>
-        <p id="day-msg"></p>
+    <div class="episodes-title">Season 2026: Valentine Week</div>
+    <div class="row" id="episode-list">
+        </div>
+
+    <div id="modal">
+        <div class="close-btn" onclick="closeModal()">&times;</div>
+        <div id="modal-content"></div>
     </div>
 
     <script>
         // --- CONFIGURATION ---
-        const days = {
-            7:  { theme: "bg-rose", icon: "🌹", title: "Happy Rose Day!", msg: "Start of something beautiful." },
-            8:  { theme: "bg-propose", icon: "💍", title: "Happy Propose Day!", msg: "You are my bug-free code." },
-            9:  { theme: "bg-chocolate", icon: "🍫", title: "Happy Chocolate Day!", msg: "You're sweeter than success." },
-            10: { theme: "bg-teddy", icon: "🧸", title: "Happy Teddy Day!", msg: "Sending you a virtual hug." },
-            11: { theme: "bg-promise", icon: "🤞", title: "Happy Promise Day!", msg: "I promise to debug all your problems." },
-            12: { theme: "bg-hug", icon: "🤗", title: "Happy Hug Day!", msg: "Loading Hug... 100% Complete." },
-            13: { theme: "bg-kiss", icon: "💋", title: "Happy Kiss Day!", msg: "Compiling kisses for you..." },
-            14: { theme: "bg-valentine", icon: "❤️", title: "Happy Valentine's Day!", msg: "My Player 2 Forever." }
-        };
+        // Add more "Episodes" here
+        const episodes = [
+            { day: 7, title: "Ep 1: Rose Day", msg: "🌹 A Rose for my Queen.", color: "#ff7675" },
+            { day: 8, title: "Ep 2: Propose Day", msg: "💍 Will you be my permanent duo?", color: "#74b9ff" },
+            { day: 9, title: "Ep 3: Chocolate Day", msg: "🍫 You are sweeter than code that compiles on the first try.", color: "#6c5ce7" },
+            { day: 10, title: "Ep 4: Teddy Day", msg: "🧸 Big hugs incoming!", color: "#fab1a0" },
+            { day: 11, title: "Ep 5: Promise Day", msg: "🤞 I promise to always be by your side.", color: "#0984e3" },
+            { day: 12, title: "Ep 6: Hug Day", msg: "🤗 Sending a virtual squeeze.", color: "#fd79a8" },
+            { day: 13, title: "Ep 7: Kiss Day", msg: "💋 Mwaah!", color: "#e84393" },
+            { day: 14, title: "Ep 8: The Finale", msg: "❤️ Happy Valentine's Day! I love you.", color: "#d63031" }
+        ];
 
         const today = new Date();
         const currentDay = today.getDate(); 
         // const currentDay = 11; // UNCOMMENT TO TEST
 
-        // --- DOM ELEMENTS ---
-        const storyContainer = document.getElementById('story-container');
-        const dailyContainer = document.getElementById('daily-content');
-        const avatar = document.getElementById('avatar');
-        const bubble = document.getElementById('thought-bubble');
-        const terminal = document.getElementById('terminal');
-        const loader = document.getElementById('loader');
-        const replayBtn = document.getElementById('replay-btn');
+        const episodeContainer = document.getElementById('episode-list');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
 
-        // --- CHECK HISTORY ---
-        const hasVisited = localStorage.getItem('hasVisitedValentine');
-
-        if (!hasVisited) {
-            playStory();
-        } else {
-            showDailyContent();
-        }
-
-        // --- RESET FUNCTION ---
-        function resetStory() {
-            localStorage.removeItem('hasVisitedValentine');
-            location.reload();
-        }
-
-        // --- SCENE 1: THE STORY ---
-        function playStory() {
-            storyContainer.style.display = 'flex';
-            dailyContainer.style.display = 'none';
-            replayBtn.style.display = 'none';
+        // RENDER EPISODES
+        episodes.forEach(ep => {
+            const card = document.createElement('div');
+            card.className = 'card';
             
-            // Step 1: Working hard
-            bubble.innerText = "Just solving this Codeforces problem..."; // Customized for Rakibul
-            
-            // Step 2: Realization (3 seconds later)
-            setTimeout(() => {
-                avatar.innerText = "😱"; 
-                bubble.innerText = "WAIT! It's Valentine's Week?!";
-            }, 3000);
-
-            // Step 3: Action (6 seconds later)
-            setTimeout(() => {
-                avatar.innerText = "🏃‍♂️"; 
-                bubble.innerText = "I need to fix this NOW!";
-            }, 6000);
-
-            // Step 4: Coding (8 seconds later)
-            setTimeout(() => {
-                avatar.innerText = "👨‍💻"; 
-                bubble.style.display = 'none'; 
-                terminal.style.display = 'block'; 
-                typeCode();
-            }, 8000);
-        }
-
-        function typeCode() {
-            const codeLines = [
-                "> init project love_for_her",
-                "> import heart",
-                "> while(alive) { love++ }",
-                "> git commit -m 'For Her'",
-                "> deploy to production..."
-            ];
-            let lineIndex = 0;
-            terminal.innerHTML = ""; // Clear previous text
-            
-            let typeInterval = setInterval(() => {
-                if (lineIndex < codeLines.length) {
-                    terminal.innerHTML += codeLines[lineIndex] + "<br>";
-                    lineIndex++;
-                } else {
-                    clearInterval(typeInterval);
-                    loader.style.width = "100%";
-                    setTimeout(() => {
-                        localStorage.setItem('hasVisitedValentine', 'true');
-                        storyContainer.style.display = 'none';
-                        showDailyContent();
-                    }, 2000);
-                }
-            }, 800); 
-        }
-
-        // --- SCENE 2: THE DAILY REVEAL ---
-        function showDailyContent() {
-            dailyContainer.style.display = 'flex';
-            replayBtn.style.display = 'block'; // Show replay button
-            
-            let data = days[currentDay];
-            
-            if (data) {
-                document.body.className = data.theme;
-                // We use dailyContainer background too to ensure coverage
-                dailyContainer.className = data.theme; 
-                document.getElementById('day-icon').innerText = data.icon;
-                document.getElementById('day-title').innerText = data.title;
-                document.getElementById('day-msg').innerText = data.msg;
+            // Logic: Unlock if day is passed or is today
+            if (currentDay >= ep.day) {
+                card.style.background = ep.color;
+                card.innerHTML = `<h3>${ep.title}</h3>`;
+                card.onclick = () => openModal(ep.msg, ep.color);
             } else {
-                // Fallback
-                document.body.style.background = "#2d3436";
-                document.getElementById('day-icon').innerText = "💖";
-                document.getElementById('day-title').innerText = "Love You!";
-                document.getElementById('day-msg').innerText = "Every day is your day.";
+                card.className += " locked";
+                card.innerHTML = `<h3>${ep.title}</h3>`;
             }
+            episodeContainer.appendChild(card);
+        });
+
+        function playToday() {
+            // Finds the latest unlocked episode
+            const todayEp = episodes.find(e => e.day === currentDay);
+            if (todayEp) {
+                openModal(todayEp.msg, todayEp.color);
+            } else if (currentDay > 14) {
+                 openModal("Season Finale Complete! ❤️", "#d63031");
+            } else {
+                 openModal("Wait for the next episode...", "#333");
+            }
+        }
+
+        function openModal(msg, color) {
+            modal.style.display = 'flex';
+            modalContent.innerText = msg;
+            modalContent.style.color = color;
+            // Add a fun big emoji or animation here if you want
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
         }
     </script>
 </body>
 </html>
-
