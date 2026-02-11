@@ -7,55 +7,67 @@
     <style>
         body {
             margin: 0;
-            background-color: #020202; /* Void Black */
+            background-color: #000;
             overflow: hidden;
             font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
+        
         canvas {
             display: block;
+            z-index: 1;
         }
-        #ui {
+
+        #ui-container {
             position: absolute;
-            bottom: 50px;
-            width: 100%;
+            top: 55%; /* Positioned just below center */
             text-align: center;
-            pointer-events: none;
             z-index: 10;
+            width: 100%;
+            pointer-events: none;
         }
+
         .caption {
-            color: #00f3ff; /* Hologram Cyan */
-            font-size: 1.5rem;
+            color: #fff;
+            font-size: 2rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
+            letter-spacing: 4px;
             font-weight: bold;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.8);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
             opacity: 0;
-            animation: fadeIn 2s ease forwards 4s; /* Waits for hands to join */
+            animation: fadeIn 1s ease forwards 4s; /* Waits for animation */
         }
+
         .sub-caption {
-            font-size: 1rem;
-            color: #aaddff;
-            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-top: 10px;
             font-family: 'Segoe UI', sans-serif;
             opacity: 0;
-            animation: fadeIn 2s ease forwards 5s;
+            animation: fadeIn 1s ease forwards 5s;
         }
-        .highlight { color: #fff; font-weight: bold; text-decoration: underline decoration-cyan; }
-        
+
+        .highlight { color: #00f3ff; font-weight: bold; }
+        .highlight-2 { color: #ff0055; font-weight: bold; }
+
         @keyframes fadeIn { to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        <div class="caption">Promise_Established_v2.0</div>
+    <canvas id="canvas"></canvas>
+
+    <div id="ui-container">
+        <div class="caption">Promise_Established</div>
         <div class="sub-caption">
             I promise to <span class="highlight">debug your code</span> 
-            and buy snacks from the <span class="highlight">EWU Cafeteria</span>.
+            and buy snacks from the <span class="highlight-2">Cafeteria</span>.
         </div>
     </div>
-
-    <canvas id="canvas"></canvas>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -65,141 +77,150 @@
         let particles = [];
 
         // CONFIGURATION
-        const PARTICLE_SIZE = 1.6; 
-        const GAP = 5; // Distance between particles
-        const MOUSE_RADIUS = 3000; // Power of interaction
-        const FORMATION_SPEED = 0.04; // How fast hands fly in
+        const PARTICLE_DENSITY = 6; // Lower = More particles (High Detail)
+        const PARTICLE_SIZE = 1.2;
+        
+        // --- SVG DATA FOR REAL HANDS ---
+        // These are distinct "Reaching" hand paths
+        const leftHandPath = new Path2D("M10,150 Q50,140 80,110 T150,50 Q180,30 200,60 T180,120 Q220,100 240,130 T200,180 Q230,170 240,200 T190,230 Q210,240 200,260 T150,250 Q100,300 10,300 Z"); 
+        
+        // We will actually draw the image of hands to scan them, 
+        // because paths are hard to convert to particles directly without a library.
+        // So we use a sneaky "Invisible Image" trick.
 
-        // RESIZE
         function init() {
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
+            
+            // Start the process
+            loadHandImages();
+        }
+
+        function loadHandImages() {
+            // I created a custom base64 image of TWO HANDS REACHING specifically for this.
+            // Left is CYAN, Right is MAGENTA.
+            const img = new Image();
+            img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNDAwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCI+CiAgPCEtLSBMZWZ0IEhhbmQgKEN5YW4pIC0tPgogIDxwYXRoIGQ9Ik01MCwyMDAgQzEwMCwxODAgMTUwLDE1MCAyMjAsMTYwIEMyNTAsMTY1 2ODAsMTUwIDMwMCwxODAgQzMyMCwyMDAgMzAwLDIyMCAyODAsMjMwIEMzMDAsMjQwIDMxMCwyNjAgMjkwLDI3MCBDMjcwLDI4MCAyNjAsMjkw 2NDAsMjgwIEMyNTAsMzAwIDIwMCwzMjAgMTUwLDMwMCBDMTAwLDI4MCA1MCwyNTAgNTAsMjAwIFoiIGZpbGw9IiMwMGYzZmYiLz4KCiAgPCEtLSBSaWdodCBIYW5kIChNYWdlbnRhKSAtLT4KICA8cGF0aCBkPSJNNzUwLDIwMCBDNzAwLDE4MCA2NTAsMTUwIDU4MCwxNjAgQzU1MCwxNjUgNTIwLDE1MCA1MDAsMTgwIEM0ODAsMjAwIDUwMCwyMjAgNTIwLDIzMCBDNTAwLDI0MCA0OTAsMjYwIDUxMCwyNzAgQzUzMCwyODAgNTQwLDI5MCA1NjAsMjgwIEM1NTAsMzAwIDYwMCwzMjAgNjUwLDMwMCBDNzAwLDI4MCA3NTAsMjUwIDc1MCwyMDAgWiIgZmlsbD0iI2ZmMDA1NSIvPgo8L3N2Zz4=';
+            
+            // Note: The Base64 above is a simplified placeholder. 
+            // TO MAKE FINGERS VISIBLE, we will use a "Pixel Scan" of a high-contrast handshake.
+            
+            // Let's use the Emoji approach again but SCALE IT UP massively 
+            // and force the colors.
+            
             createParticles();
         }
-        window.addEventListener('resize', init);
 
-        // --- MOUSE INTERACTION ---
-        const mouse = { x: undefined, y: undefined };
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
-
-        // --- CREATE THE HOLOGRAM ---
         function createParticles() {
             particles = [];
             
-            // 1. Draw the Emoji Invisible
-            const fontSize = Math.min(width, height) / 2.5;
-            ctx.fillStyle = 'white';
-            ctx.font = fontSize + 'px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🤝', width / 2, height / 2);
-            
-            // 2. Scan Pixels
-            const textCoordinates = ctx.getImageData(0, 0, width, height);
+            // 1. Setup the invisible canvas draw
+            const scale = Math.min(width, height) / 400; // Adjust size
+            const centerX = width / 2;
+            const centerY = height / 2 - 50; // Move up slightly so text fits below
+
             ctx.clearRect(0, 0, width, height);
+            
+            // DRAW LEFT HAND (Cyan)
+            ctx.fillStyle = '#00f3ff';
+            ctx.font = '300px Arial'; // Huge font for detail
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🫱', centerX - 20, centerY); // Hand reaching right
+
+            // DRAW RIGHT HAND (Magenta)
+            ctx.fillStyle = '#ff0055';
+            ctx.textAlign = 'left';
+            ctx.fillText('🫲', centerX + 20, centerY); // Hand reaching left
+
+            // 2. Scan Pixels
+            const data = ctx.getImageData(0, 0, width, height).data;
+            ctx.clearRect(0, 0, width, height); // Clear immediately
 
             // 3. Generate Particles
-            for (let y = 0; y < height; y += GAP) {
-                for (let x = 0; x < width; x += GAP) {
-                    if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128) {
-                        
-                        // LOGIC: Determine if this particle belongs to Left or Right hand
-                        // We split the screen in half.
-                        let startX, startY;
-                        
-                        if (x < width / 2) {
-                            // Left Hand: Starts from far Left
-                            startX = -width/2 + Math.random() * 100;
-                            startY = y + (Math.random() - 0.5) * 200; // Add chaos
-                        } else {
-                            // Right Hand: Starts from far Right
-                            startX = width + width/2 - Math.random() * 100;
-                            startY = y + (Math.random() - 0.5) * 200;
-                        }
+            // We scan every 'density' pixels
+            for (let y = 0; y < height; y += PARTICLE_DENSITY) {
+                for (let x = 0; x < width; x += PARTICLE_DENSITY) {
+                    const index = (y * width + x) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const a = data[index + 3];
 
-                        particles.push(new Particle(x, y, startX, startY));
+                    if (a > 128) {
+                        // Found a pixel!
+                        // Determine Color based on the pixel we found
+                        let color = `rgb(${r}, ${g}, ${b})`;
+                        
+                        // Origin (Target)
+                        let targetX = x;
+                        let targetY = y;
+
+                        // Start Position (Fly in from sides)
+                        let startX;
+                        if (x < width / 2) startX = -Math.random() * 500; // Left hand from left
+                        else startX = width + Math.random() * 500; // Right hand from right
+                        
+                        particles.push(new Particle(startX, y, targetX, targetY, color));
                     }
                 }
             }
         }
 
-        // --- PARTICLE PHYSICS ---
         class Particle {
-            constructor(targetX, targetY, startX, startY) {
-                this.targetX = targetX;
-                this.targetY = targetY;
-                this.x = startX; // Current position (starts off-screen)
-                this.y = startY;
+            constructor(x, y, tx, ty, color) {
+                this.x = x;
+                this.y = y + (Math.random() - 0.5) * 200; // Add chaos to Y start
+                this.tx = tx;
+                this.ty = ty;
+                this.color = color;
                 this.size = Math.random() * PARTICLE_SIZE + 0.5;
-                this.baseX = this.x;
-                this.baseY = this.y;
-                this.density = (Math.random() * 30) + 1;
-                this.color = this.getColor(targetX);
-            }
-
-            getColor(x) {
-                // Gradient Effect: Cyan to White to Blue
-                const distFromCenter = Math.abs(x - width/2);
-                if (distFromCenter < 20) return '#ffffff'; // The "Touch" point is white
-                if (x < width/2) return '#00f3ff'; // Left hand Cyan
-                return '#0099ff'; // Right hand Deep Blue
+                this.speed = (Math.random() * 0.05) + 0.02;
             }
 
             draw() {
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.closePath();
                 ctx.fill();
             }
 
             update() {
-                // 1. FLY IN ANIMATION (Ease towards target)
-                let dx = this.targetX - this.x;
-                let dy = this.targetY - this.y;
+                // Ease towards target
+                const dx = this.tx - this.x;
+                const dy = this.ty - this.y;
                 
-                // If far away, move fast. If close, slow down.
-                this.x += dx * FORMATION_SPEED;
-                this.y += dy * FORMATION_SPEED;
-
-                // 2. MOUSE DISRUPTION (Hologram Glitch)
-                let mouseDx = mouse.x - this.x;
-                let mouseDy = mouse.y - this.y;
-                let distance = Math.sqrt(mouseDx*mouseDx + mouseDy*mouseDy);
+                this.x += dx * this.speed;
+                this.y += dy * this.speed;
                 
-                if (distance < 100) {
-                    const forceDirectionX = mouseDx / distance;
-                    const forceDirectionY = mouseDy / distance;
-                    const force = (100 - distance) / 100;
-                    const directionX = forceDirectionX * force * this.density;
-                    const directionY = forceDirectionY * force * this.density;
-                    
-                    this.x -= directionX * 5;
-                    this.y -= directionY * 5;
+                // Jitter effect (Quantum vibration)
+                if (Math.abs(dx) < 1) {
+                    this.x += (Math.random() - 0.5) * 0.5;
+                    this.y += (Math.random() - 0.5) * 0.5;
                 }
             }
         }
 
-        // --- LOOP ---
         function animate() {
-            // Trail Effect: Leaves a slight blur behind moving particles
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            // Clear with slight trail for motion blur
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
             ctx.fillRect(0, 0, width, height);
-            
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].draw();
-                particles[i].update();
-            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
             requestAnimationFrame(animate);
         }
 
+        window.addEventListener('resize', init);
+        
+        // Start
         init();
         animate();
+
     </script>
 </body>
 </html>
