@@ -16,13 +16,24 @@
         .progress-bar { width: 0%; height: 5px; background: #00ff00; margin-top: 10px; transition: width 2s; }
 
         /* --- LOVEFLIX UI --- */
-        #loveflix-container { display: none; }
+        #loveflix-container { display: none; position: relative; }
         .hero { height: 70vh; background: linear-gradient(to top, var(--bg-black), transparent), url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; }
         h1 { font-size: 4rem; margin: 0; color: var(--netflix-red); letter-spacing: 2px; }
         .description { width: 60%; font-size: 1.2rem; margin: 20px 0; color: #dcdcdc; }
+        
+        /* Buttons */
         .btn { padding: 12px 25px; font-size: 1.1rem; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; font-weight: bold; }
         .btn-play { background: white; color: black; }
         
+        /* Reset Button (Top Right) */
+        .btn-reset { 
+            position: absolute; top: 20px; right: 20px; 
+            background: rgba(0, 0, 0, 0.7); border: 1px solid #fff; color: #fff; 
+            font-size: 0.9rem; z-index: 100;
+        }
+        .btn-reset:hover { background: var(--netflix-red); border-color: var(--netflix-red); }
+
+        /* Rows */
         .row-title { padding-left: 40px; margin-top: 30px; font-size: 1.4rem; color: #e5e5e5; }
         .row { display: flex; overflow-x: auto; padding: 20px 40px; gap: 15px; scrollbar-width: none; }
         .ep-card { min-width: 260px; background: #2f2f2f; border-radius: 4px; cursor: pointer; transition: 0.3s; overflow: hidden; }
@@ -35,17 +46,11 @@
         /* --- VIDEO PLAYER MODAL --- */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; flex-direction: column; }
         
-        /* Video Container */
         .video-wrapper { position: relative; width: 90%; max-width: 800px; z-index: 3002; box-shadow: 0 0 30px rgba(229, 9, 20, 0.5); border-radius: 8px; overflow: hidden; }
         video { width: 100%; display: block; }
 
-        /* Text Below Video */
         #m-title { margin-top: 20px; font-size: 1.5rem; color: white; z-index: 3002; }
         #m-text { color: #ccc; margin-top: 5px; z-index: 3002; }
-
-        /* Falling Particles */
-        .particle { position: absolute; pointer-events: none; animation: fall linear infinite; z-index: 3001; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
         .close-btn { margin-top: 20px; padding: 10px 25px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; cursor: pointer; z-index: 3002; }
         .close-btn:hover { background: var(--netflix-red); border-color: var(--netflix-red); }
@@ -63,6 +68,8 @@
     </div>
 
     <div id="loveflix-container">
+        <button class="btn btn-reset" onclick="resetStory()">↺ Replay Intro</button>
+
         <div class="hero">
             <h1>LOVEFLIX</h1>
             <p class="description">He's an ICE engineer. She's his favorite bug. A series about life, code, and love at East West University.</p>
@@ -86,16 +93,16 @@
 
     <script>
         // --- DATA CONFIGURATION ---
-        // Ensure filenames match EXACTLY what is in your folder
+        // Files matched to your exact filenames
         const episodes = [
-            { day: 7, title: "Rose Day", msg: "A rose for you.", icon: "🌹", file: "Rosa Day.mp4", emoji: "🌹" },
-            { day: 8, title: "Propose Day", msg: "Will you be my Player 2?", icon: "💍", file: "propose day.mp4", emoji: "💍" },
-            { day: 9, title: "Chocolate Day", msg: "Sweets for the sweet.", icon: "🍫", file: "Chocolate day.mp4", emoji: "🍫" },
-            { day: 10, title: "Teddy Day", msg: "A warm hug.", icon: "🧸", file: "Teddy Day.mp4", emoji: "🧸" }, 
-            { day: 11, title: "Promise Day", msg: "I promise to debug your code.", icon: "🤝", file: "promise day.mp4", emoji: "✨" }, 
-            { day: 12, title: "Hug Day", msg: "Connection established.", icon: "🤗", file: "Hug Day.mp4", emoji: "🤗" },
-            { day: 13, title: "Kiss Day", msg: "Binary kisses.", icon: "💋", file: "kiss day.mp4", emoji: "💋" },
-            { day: 14, title: "Valentine's Day", msg: "Forever Us.", icon: "❤️", file: "valentine day.mp4", emoji: "❤️" }
+            { day: 7, title: "Rose Day", msg: "A rose for you.", icon: "🌹", file: "Rosa Day.mp4" },
+            { day: 8, title: "Propose Day", msg: "Will you be my Player 2?", icon: "💍", file: "propose day.mp4" },
+            { day: 9, title: "Chocolate Day", msg: "Sweets for the sweet.", icon: "🍫", file: "Chocolate day.mp4" },
+            { day: 10, title: "Teddy Day", msg: "A warm hug.", icon: "🧸", file: "Teddy day.mp4" }, // Updated as requested
+            { day: 11, title: "Promise Day", msg: "I promise to debug your code.", icon: "🤝", file: "promise day.mp4" }, 
+            { day: 12, title: "Hug Day", msg: "Connection established.", icon: "🤗", file: "Hug Day.mp4" },
+            { day: 13, title: "Kiss Day", msg: "Binary kisses.", icon: "💋", file: "kiss day.mp4" },
+            { day: 14, title: "Valentine's Day", msg: "Forever Us.", icon: "❤️", file: "valentine day.mp4" }
         ];
 
         const today = new Date();
@@ -107,6 +114,11 @@
             if (localStorage.getItem('seenIntro')) return showLoveflix();
             playIntro();
         };
+
+        function resetStory() { 
+            localStorage.removeItem('seenIntro'); 
+            location.reload(); 
+        }
 
         function playIntro() {
             const avatar = document.getElementById('avatar');
@@ -138,7 +150,7 @@
             const list = document.getElementById('episode-list');
             episodes.forEach(ep => {
                 const card = document.createElement('div');
-                // Lock logic: Only unlock days up to today
+                // Lock logic
                 const isLocked = currentDay < ep.day;
                 card.className = `ep-card ${isLocked ? 'locked' : ''}`;
                 card.innerHTML = `<div class="ep-thumb">${ep.icon}</div><div class="ep-info"><div class="ep-title">${ep.title}</div></div>`;
@@ -147,7 +159,7 @@
             });
         }
 
-        // --- VIDEO PLAYER & ANIMATION ---
+        // --- VIDEO PLAYER ---
         function openPlayer(ep) {
             const modal = document.getElementById('modal');
             const video = document.getElementById('main-video');
@@ -159,31 +171,6 @@
             // Load Video
             video.src = ep.file;
             video.load();
-
-            // Start Shower Animation
-            startShower(ep.emoji);
-
-            // STOP Shower when video plays
-            video.onplay = () => stopShower();
-        }
-
-        function startShower(emoji) {
-            // Create particles
-            for(let i=0; i<40; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.innerText = emoji;
-                p.style.left = Math.random() * 100 + 'vw';
-                p.style.fontSize = (Math.random() * 20 + 20) + 'px';
-                p.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                p.style.top = '-50px';
-                document.getElementById('modal').appendChild(p);
-            }
-        }
-
-        function stopShower() {
-            const particles = document.querySelectorAll('.particle');
-            particles.forEach(p => p.remove());
         }
 
         function playToday() {
@@ -196,7 +183,6 @@
             video.pause();
             video.src = ""; // Stop buffering
             document.getElementById('modal').style.display = 'none';
-            stopShower(); // Clear any remaining particles
         }
     </script>
 </body>
