@@ -3,145 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promise Day Connection</title>
+    <title>Protocol: PROMISE</title>
     <style>
         body {
             margin: 0;
-            height: 100vh;
-            background: radial-gradient(circle at center, #001f3f, #000000); /* Nokia-esque deep blue */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050505; /* Deep Void Black */
             overflow: hidden;
+            font-family: 'Courier New', monospace;
         }
-
-        .stage {
-            position: relative;
+        canvas {
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            bottom: 30px;
             width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* --- THE HANDS --- */
-        .hand {
-            position: absolute;
-            width: 300px;
-            height: auto;
-            filter: drop-shadow(0 0 15px rgba(100, 200, 255, 0.8)); /* Glowing effect */
-            opacity: 0.9;
-        }
-
-        #hand-left {
-            left: -300px; /* Start off-screen */
-            animation: moveLeft 3s ease-in-out forwards;
-        }
-
-        #hand-right {
-            right: -300px; /* Start off-screen */
-            animation: moveRight 3s ease-in-out forwards;
-        }
-
-        /* The "Clasp" moment - a separate image that fades in */
-        #hand-clasped {
-            width: 400px;
-            opacity: 0;
-            animation: clasping 4s ease-in-out forwards;
-        }
-
-        /* --- THE MESSAGE --- */
-        .message-container {
-            position: absolute;
             text-align: center;
-            color: white;
-            opacity: 0;
+            pointer-events: none;
             z-index: 10;
-            animation: showMessage 1s ease-in-out forwards 5s; /* Starts after 5s */
         }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
+        .caption {
+            color: #00d2ff; /* Nokia/Tron Cyan */
+            font-size: 1.2rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            color: #4db8ff; /* Cyan glow */
-            text-shadow: 0 0 20px #4db8ff;
-        }
-
-        p {
-            font-size: 1.5rem;
-            line-height: 1.6;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .highlight {
-            color: #ffdfba; /* Snack color */
-            font-weight: bold;
-        }
-
-        /* --- ANIMATION KEYFRAMES --- */
-        
-        /* Move hands to center */
-        @keyframes moveLeft {
-            0% { left: -350px; opacity: 0; }
-            50% { opacity: 1; }
-            100% { left: calc(50% - 230px); opacity: 1; } /* Position just before touching */
-        }
-        @keyframes moveRight {
-            0% { right: -350px; opacity: 0; }
-            50% { opacity: 1; }
-            100% { right: calc(50% - 230px); opacity: 1; }
-        }
-
-        /* Fade out separate hands, fade in clasped hands */
-        @keyframes clasping {
-            0%, 60% { opacity: 0; transform: scale(0.9); }
-            75% { opacity: 1; transform: scale(1); } /* Clasp appears */
-            85% { opacity: 1; transform: scale(1); } /* Hold */
-            100% { opacity: 0; transform: scale(1.1); } /* Fade out */
-        }
-
-        /* Show final message */
-        @keyframes showMessage {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Hide separate hands when clasp appears */
-        #hand-left, #hand-right {
-            animation-fill-mode: forwards;
-        }
-        body.clasping #hand-left, body.clasping #hand-right {
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
             opacity: 0;
-            transition: opacity 0.5s 2.5s; /* Fade out at 2.5s */
+            animation: fadeIn 2s ease forwards 4s;
         }
-
+        .sub-caption {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 10px;
+            font-family: sans-serif;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards 5s;
+        }
+        .highlight { color: #fff; font-weight: bold; }
+        
+        @keyframes fadeIn { to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="stage">
-        <img id="hand-left" class="hand" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><path fill='%23e0f7fa' d='M412.4 274c-19.6-16-46.3-25.7-72.2-31.6-13.9-3.2-28.3-5.7-42.4-8.7-23.1-4.8-46.6-10.2-69-18.6-21.8-8.2-41.4-20.6-58.2-36.6-14.5-13.7-27.2-30-40.5-45.3-21-24.2-44.8-46.1-73.1-62-13.8-7.7-28.7-13.6-43.8-17.8-13.5-3.8-28.4-5.2-41.6.4-11.7 5-20.7 15.8-25.2 27.7-3.3 8.8-3.7 18.6-2.3 27.9 2 13.8 8.8 26.7 17.8 37.8 15.8 19.5 36.7 35 57.8 49.6 26.3 18.3 54.4 33.4 83.4 47 23.1 10.9 47 20.4 71.3 28.2 18.1 5.8 36.5 11.1 55.1 14.9 26.9 5.5 54.4 8.7 81.9 11.5 18.5 1.9 37.3 2.4 55.3-1.6 11.6-2.6 22.9-7 32.9-14.1 11.4-8.2 20.3-19.9 24.2-33.5 2.2-7.9 2.4-16.4 1.1-24.6-1.9-12.4-8.6-23.6-18.7-31.3z'/></svg>" alt="Left hand">
-
-        <img id="hand-right" class="hand" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><path fill='%23e0f7fa' d='M87.6 274c19.6-16 46.3-25.7 72.2-31.6 13.9-3.2 28.3-5.7 42.4-8.7 23.1-4.8 46.6-10.2 69-18.6 21.8-8.2 41.4-20.6 58.2-36.6 14.5-13.7 27.2-30 40.5-45.3 21-24.2 44.8-46.1 73.1-62 13.8-7.7 28.7-13.6 43.8-17.8 13.5-3.8 28.4-5.2 41.6.4 11.7 5 20.7 15.8 25.2 27.7 3.3 8.8 3.7 18.6 2.3 27.9-2 13.8-8.8 26.7-17.8 37.8-15.8 19.5-36.7 35-57.8 49.6-26.3 18.3-54.4 33.4-83.4 47-23.1 10.9-47 20.4-71.3 28.2-18.1 5.8-36.5 11.1-55.1 14.9-26.9 5.5-54.4 8.7-81.9 11.5-18.5 1.9-37.3 2.4-55.3-1.6-11.6-2.6-22.9-7-32.9-14.1-11.4-8.2-20.3-19.9-24.2-33.5-2.2-7.9-2.4-16.4-1.1-24.6 1.9-12.4 8.6-23.6 18.7-31.3z'/></svg>" alt="Right hand">
-
-        <img id="hand-clasped" class="hand" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23e0f7fa' d='M332.5 129.2c-26.1 16.8-52.5 27.7-78.8 29.6-17.4 1.3-35.3-2-53.1-10.5-34.3-16.4-62.2-46-85.6-79.1-17.3-24.5-34-51-53.9-72-27-28.3-63.6-48.8-102.1-57.3-26.9-5.9-55.3-4.7-80.7 5.6-16.3 6.6-30.2 18.6-38.6 33.5-6 10.7-9.1 23.2-9.1 35.5 0 25.7 10 50.3 26.8 69.7 35.3 40.8 84.1 68.9 133.4 90.2 45 19.4 92.7 31.8 141.1 37.8 48.7 6.1 98.3 6.1 147.1.2 37.4-4.6 73.4-16.1 107.6-33.2 29.5-14.8 56.7-35 78.8-59.5 22.7-25.2 38.4-56.3 44.7-89.7 3.5-18.7 3.5-38.3.1-57.2-4.9-27.4-21.1-51.7-43.7-67.7-23.8-16.8-53.8-23.5-82.5-18.4-23.5 4.2-45.4 15.9-62.9 32.3-22.2 20.8-37.2 48.3-48.8 77.2-8.8 22-14.9 45.1-19.9 68.5z'/></svg>" alt="Clasped hands">
-
-        <div class="message-container">
-            <h1>Happy Promise Day</h1>
-            <p>I promise to <span class="highlight">debug your code</span> and buy you snacks from the <span class="highlight">cafeteria</span>.</p>
+    <div id="ui">
+        <div class="caption">Connection Established</div>
+        <div class="sub-caption">
+            I promise to <span class="highlight">debug your code</span> 
+            and buy snacks from the <span class="highlight">EWU Cafeteria</span>.
         </div>
     </div>
 
-    <script>
-        // Trigger the fade out of separate hands when the clasp animation starts
-        setTimeout(() => {
-            document.body.classList.add('clasping');
-        }, 2500);
-    </script>
+    <canvas id="canvas"></canvas>
 
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        let adjustX = 0;
+        let adjustY = 0;
+
+        // CONFIGURATION
+        const PARTICLE_SIZE = 1.5; // Small, crisp dots
+        const PARTICLE_COLOR = 'rgba(0, 210, 255, 1)'; // Cyan Cyan
+        const MOUSE_RADIUS = 100;
+        const GAP = 5; // Distance between particles (Lower = More detailed but slower)
+
+        // MOUSE INTERACTION
+        const mouse = { x: null, y: null, radius: 100 };
+        
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        // RESIZE
+        function init() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            createParticles();
+        }
+        window.addEventListener('resize', init);
+
+        // --- THE MAGIC: SCANNING TEXT TO CREATE PARTICLES ---
+        function createParticles() {
+            particles = [];
+            
+            // 1. Write the Emoji/Text to the canvas invisibly
+            // We use the 🤝 Emoji as the blueprint!
+            const fontSize = Math.min(width, height) / 3;
+            ctx.fillStyle = 'white';
+            ctx.font = fontSize + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Draw the Handshake Emoji
+            ctx.fillText('🤝', width / 2, height / 2);
+            
+            // 2. Scan the canvas pixel data
+            const textCoordinates = ctx.getImageData(0, 0, width, height);
+            
+            // 3. Clear the canvas (we only needed the data)
+            ctx.clearRect(0, 0, width, height);
+
+            // 4. Create particles wherever the pixel was not transparent
+            for (let y = 0; y < height; y += GAP) {
+                for (let x = 0; x < width; x += GAP) {
+                    // Check alpha value (4th byte in RGBA)
+                    if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128) {
+                        let positionX = x;
+                        let positionY = y;
+                        particles.push(new Particle(positionX, positionY));
+                    }
+                }
+            }
+        }
+
+        // --- PARTICLE CLASS ---
+        class Particle {
+            constructor(x, y) {
+                // Target Position (Where it wants to be)
+                this.originX = x;
+                this.originY = y;
+                
+                // Current Position (Starts random)
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                
+                // Physics
+                this.density = (Math.random() * 30) + 1;
+                this.size = Math.random() * PARTICLE_SIZE + 0.5;
+                this.vx = 0; // Velocity
+                this.vy = 0;
+            }
+
+            draw() {
+                ctx.fillStyle = PARTICLE_COLOR;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            update() {
+                // Mouse Interaction Physics
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+
+                if (distance < mouse.radius) {
+                    this.x -= directionX * 3;
+                    this.y -= directionY * 3;
+                } else {
+                    // Return to Origin (The Hand Shape)
+                    if (this.x !== this.originX) {
+                        let dx = this.x - this.originX;
+                        this.x -= dx / 15; // Speed of return
+                    }
+                    if (this.y !== this.originY) {
+                        let dy = this.y - this.originY;
+                        this.y -= dy / 15;
+                    }
+                }
+            }
+        }
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Connect particles with lines if they are close (Nokia "Connection" effect)
+            // Warning: Computationally expensive, so we check only a few neighbors or skip
+            // For mobile performance, we stick to dots, maybe adding a glow overlay
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].draw();
+                particles[i].update();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // START
+        init();
+        animate();
+
+        // --- COOL INTRO EFFECT ---
+        // Scatter particles initially then let them come together
+        setTimeout(() => {
+            particles.forEach(p => {
+                p.x = Math.random() * width;
+                p.y = Math.random() * height;
+            });
+        }, 100);
+
+    </script>
 </body>
 </html>
